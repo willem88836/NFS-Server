@@ -1,18 +1,19 @@
 import socket
 from socket import *
 import threading
-import FtpBase
+import NfsBase
+from RpcMessage import *
 
 
 class RpcServerThread(threading.Thread): 
 
-    def __init__(self, clientSocket, clientAddress, ftpServer):
+    def __init__(self, clientSocket, clientAddress, nfsServer):
         threading.Thread.__init__(self)
         self.name = "RpcThread%s" % str(clientAddress)
         self.ClientSocket = clientSocket
         self.ClientAddress = clientAddress
-        self.FtpServer = ftpServer
-        self.Buffer = FtpBase.Buffer
+        self.NfsServer = nfsServer
+        self.Buffer = NfsBase.Buffer
         print("Initialized: %s" % self.name)
 
     def run(self):
@@ -22,18 +23,20 @@ class RpcServerThread(threading.Thread):
             print("%s is awaiting messages..." % self.name)
 
             while isConnected:
-                message = self.ClientSocket.recv(FtpBase.Buffer).decode()
+                message = self.ClientSocket.recv(NfsBase.Buffer).decode()
                 print("%s received message: %s" % (self.name, str(message)))
 
                 if message == "":
                     isConnected = False
                     continue
                 
-                # Decode message;
-                # Forward message to Request Handler
+                rpcMessage = RpcMessage(message)
+                # forward to Rpc handler
+
+
         except Exception: 
             print("An error occured. thread %s terminated" % self.name)
 
         print("Thread %s closing..." % self.name)
         self.ClientSocket.close()
-        self.FtpServer.CloseConnection(self)
+        self.NfsServer.CloseConnection(self)

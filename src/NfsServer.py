@@ -1,20 +1,20 @@
 from socket import *
 import threading
-import FtpBase
+import NfsBase
 from RpcServerThread import * 
 
 connectionSemaphore = threading.BoundedSemaphore(value=1)
 
 
-class FtpServer: 
+class NfsServer: 
 
     currentConnections = 0
     maximumConnections = 5
     isActive = True
     
     def __init__(self):
-        print("Initializing Server On port: %s" % FtpBase.Port)
-        self.connectionPort = FtpBase.Port
+        print("Initializing Server On port: %s" % NfsBase.Port)
+        self.connectionPort = NfsBase.Port
         self.StartReceivingConnections()
 
 

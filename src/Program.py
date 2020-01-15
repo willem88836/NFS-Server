@@ -1,6 +1,6 @@
 
-from FtpClient import *
-from FtpServer import *
+from NfsClient import *
+from NfsServer import *
 
-localServer = FtpServer()
-# localClient = FtpClient()
+localServer = NfsServer()
+# localClient = NfsClient()
