@@ -7,13 +7,14 @@ from RpcMessage import *
 
 class RpcServerThread(threading.Thread): 
 
-    def __init__(self, clientSocket, clientAddress, nfsServer):
+    def __init__(self, clientSocket, clientAddress, nfsServer, rpcHandler):
         threading.Thread.__init__(self)
         self.name = "RpcThread%s" % str(clientAddress)
         self.ClientSocket = clientSocket
         self.ClientAddress = clientAddress
         self.NfsServer = nfsServer
         self.Buffer = NfsBase.Buffer
+        self.RpcHandler = rpcHandler
         print("Initialized: %s" % self.name)
 
     def run(self):
@@ -31,8 +32,7 @@ class RpcServerThread(threading.Thread):
                     continue
                 
                 rpcMessage = RpcMessage(message)
-                # forward to Rpc handler
-
+                self.RpcHandler.Handle(rpcMessage)
 
         except Exception: 
             print("An error occured. thread %s terminated" % self.name)
