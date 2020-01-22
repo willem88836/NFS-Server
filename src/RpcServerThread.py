@@ -40,3 +40,7 @@ class RpcServerThread(threading.Thread):
         print("Thread %s closing..." % self.name)
         self.ClientSocket.close()
         self.NfsServer.CloseConnection(self)
+
+    def Sendmessage(message):
+        print (message)
+        #TODO: send message

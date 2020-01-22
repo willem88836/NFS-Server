@@ -1,11 +1,9 @@
 from RpcMessage import *
-
+import os
 
 class FileHandler:
-    Root = ""
-
-    def __init__(self, root):
-        #TODO: test root existence. 
+    def __init__(self, nfsServer, root):
+        self.nfsServer = nfsServer
         self.root = root
         print("File handler initialized.")
 
@@ -16,21 +14,38 @@ class FileHandler:
         if requestType == HandleTypes.ExceptionOccurred:
             print("error")    
         elif requestType == HandleTypes.RequestFileAccess:
-            print ("file request")
-            self.HandleRequestFileAccess(args)
+            print ("file read request")
+            self.HandleRequestFileRead(args)
         elif requestType == HandleTypes.ReleaseFileAccess:
             print ("release file")
         elif requestType == HandleTypes.RequestFileUpdate:
             print ("request file update")
 
 
-    def HandleRequestFileAccess(self, args):
-        completePath = self.Root + args
+    def HandleRequestFileRead(self, args):
+        p = self.root + '\\' + args
+        print("file requested: %s" % p)
 
+        if not os.path.isfile(p)
+            errorMessage = RpcMessage(HandleTypes.ExceptionOccurred, ExceptionTypes.FileNotFound)
+            return
+        
+        message = RpcMessage(HandleTypes.RequestFileRead, path)
+        #TODO: Start Stream
+
+
+
+    def IsLocked(p):
+        return False
+        
 
 
 class HandleTypes:
     ExceptionOccurred = 0
-    RequestFileAccess = 1
-    ReleaseFileAccess = 2
-    RequestFileUpdate = 3
+    RequestFileRead = 1
+    RequestFileWrite = 2
+    ReleaseFileWrite = 3
+    RequestFileUpdate = 4
+
+class ExceptionTypes:
+    FileNotFound = 0
