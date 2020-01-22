@@ -17,6 +17,5 @@ class RpcMessage:
         self.Args = message[1:len(message)]
         
     def Wrap(self):
-        # TODO: This doesn't work yet.
-        wrap = self.Type + self.Args
+        wrap = [self.Type, self.Args]
         return wrap

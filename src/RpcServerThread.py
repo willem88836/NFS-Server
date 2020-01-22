@@ -42,5 +42,6 @@ class RpcServerThread(threading.Thread):
         self.NfsServer.CloseConnection(self)
 
     def SendMessage(self, message):
-        print (message)
-        #TODO: send message
+        msg = str(message.Wrap()).encode()
+        self.ClientSocket.send(msg)
+        print("sent message (%s) from %s" % (msg, self.name))
