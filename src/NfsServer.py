@@ -6,11 +6,8 @@ from socket import *
 import threading
 from tkinter.filedialog import askdirectory
 
-connectionSemaphore = threading.BoundedSemaphore(value=1)
-
-
 class NfsServer: 
-
+    connectionSemaphore = threading.BoundedSemaphore(value=1)
     currentConnections = 0
     maximumConnections = 5
     isActive = True
@@ -35,15 +32,15 @@ class NfsServer:
             clientSocket, clientIP = rpcSocket.accept()
             
             rpcThread = RpcServerThread(clientSocket, clientIP, self, self.fileHandler)
-            connectionSemaphore.acquire(self)
+            self.connectionSemaphore.acquire(self)
             self.currentConnections += 1
-            connectionSemaphore.release()
+            self.connectionSemaphore.release()
             rpcThread.start()
 
         rpcSocket.close()
 
     def CloseConnection(self, rpcThread):
-        connectionSemaphore.acquire(rpcThread)
+        self.connectionSemaphore.acquire(rpcThread)
         self.currentConnections -= 1
-        connectionSemaphore.release()
+        self.connectionSemaphore.release()
     

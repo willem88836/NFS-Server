@@ -1,8 +1,13 @@
+import os
 from RpcMessage import *
 from RpcServerThread import *
-import os
+import threading
 
 class FileHandler:
+    lockSemaphore = threading.BoundedSemaphore(value=1)
+    fileLockTable = {}
+    userLockTable = {}
+
     def __init__(self, nfsServer, root):
         self.nfsServer = nfsServer
         self.root = root
@@ -19,13 +24,13 @@ class FileHandler:
         elif requestType == HandleTypes.ReleaseFileWrite:
             self.HandleReleaseFileWrite(issuer, args)
         elif requestType == HandleTypes.RequestFileUpdate:
-            print ("request file update")
+            self.HandleFileUpdate(issuer, args)
+        elif requestType == HandleTypes.RequestDirectoryContents:
+            self.HandleDirectoryContents(issuer, args)
 
 
     def HandleRequestFileRead(self, issuer, args):
-        p = self.root + '\\' + args
-        print("file read requested: %s" % p)
-
+        p = self.root + '/' + args
         msg = None
 
         if not os.path.isfile(p):
@@ -34,36 +39,34 @@ class FileHandler:
             msg = RpcMessage(HandleTypes.RequestFileRead, args)
         
         issuer.SendMessage(msg)
+        print("file read requested: %s" % p)
 
     def HandleRequestFileWrite(self, issuer, args):
-        p = self.root + '\\' + args
-        print ("file write requested: %s" % p)
-
+        p = self.root + '/' + args
         msg = None
 
         if not os.path.isfile(p):
             msg = RpcMessage(HandleTypes.ExceptionOccurred, [ExceptionTypes.FileNotFound, args])
-        elif IsLocked(p) and not LockOwnedBy(p, issuer):
+        elif self.IsLocked(p) and not self.LockOwnedBy(p, issuer):
             msg = RpcMessage(HandleTypes.ExceptionOccurred, [ExceptionTypes.FileIsLocked, args])
-        elif LockOwnedBy(p, issuer):
+        elif self.LockOwnedBy(p, issuer):
             msg = RpcMessage(HandleTypes.RequestFileWrite, args)
         else:
-            CreateLock(p, issuer)
+            self.CreateLock(p, issuer)
             msg = RpcMessage(HandleTypes.RequestFileWrite, args)
 
         issuer.SendMessage(msg)
+        print ("file write requested: %s" % p)
 
     def HandleReleaseFileWrite(self, issuer, args):
-        p = self.root + '\\' + args
-        print ("File release: %s" % p)
-
+        p = self.root + '/' + args
         msg = None
 
         if not os.path.isfile(p):
             msg = RpcMessage(HandleTypes.ExceptionOccurred, [ExceptionTypes.FileNotFound, args])
-        elif IsLocked(p):
-            if LockOwnedBy(p, issuer):
-                ReleaseLock(p, issuer)
+        elif self.IsLocked(p):
+            if self.LockOwnedBy(p, issuer):
+                self.ReleaseLock(p, issuer)
                 msg = RpcMessage(HandleTypes.ReleaseFileWrite, args)
             else:
                 msg = RpcMessage(HandleTypes.ExceptionOccurred, [ExceptionTypes.FileIsLocked, args])
@@ -71,23 +74,67 @@ class FileHandler:
             msg = RpcMessage(HandleTypes.ReleaseFileWrite, args)
             
         issuer.SendMessage(msg)
+        print ("File release: %s" % p)
+
+    def HandleFileUpdate(self, issuer, args):
+        p = self.root + '/' + args
+        msg = None
+
+        if not os.path.isfile(p):
+            msg = RpcMessage(HandleTypes.ExceptionOccurred, [ExceptionTypes.FileNotFound, args])
+        elif not self.LockOwnedBy(p, issuer):
+            msg = RpcMessage(HandleTypes.ExceptionOccurred, [ExceptionTypes.FileIsLocked, args])
+        else: 
+            msg = RpcMessage(HandleTypes.RequestFileUpdate, args)
+
+        issuer.SendMessage(msg)
+        print("File update requested: %s" % p)
+
+    def HandleDirectoryContents(self, issuer, args):
+        p = self.root + '/' + args
+        msg = None
+
+        if not os.path.isdir(p):
+            msg = RpcMessage(HandleTypes.ExceptionOccurred, [ExceptionTypes.DirectoryNotFound, args])
+        else:
+            dirs = os.listdir(p)
+            msg = RpcMessage(HandleTypes.RequestDirectoryContents, [args, dirs])
+        
+        issuer.SendMessage(msg)
+        print("Directory contents requested: %s" % p)
 
 
-    def IsLocked(p):
-        #TODO: Test lock
-        return False
+    def ReleaseAllLocks(self, issuer):
+        self.lockSemaphore.acquire(issuer)
+        if issuer in self.userLockTable:
+            for l in self.userLockTable[issuer]:
+                del(self.fileLockTable[l])
+            del(self.userLockTable[issuer])
+        self.lockSemaphore.release()
 
-    def CreateLock(p, issuer):
-        #TODO: Create lock
-        print("creating lock for file: %s" % p)
+    def IsLocked(self, p):
+        return p in self.fileLockTable
 
-    def ReleaseLock(p, issuer):
-        #TODO: Release lock
+    def CreateLock(self, p, issuer):
+        self.lockSemaphore.acquire(issuer)
+        self.fileLockTable[p] = issuer
+        if not issuer in self.userLockTable:
+            self.userLockTable[issuer] = []
+        self.userLockTable[issuer].append(p)
+        self.lockSemaphore.release()
+        print("created lock for file: %s" % p)
+
+    def ReleaseLock(self, p, issuer):
+        self.lockSemaphore.acquire(issuer)
+        self.userLockTable[issuer].remove(p)
+        del(self.fileLockTable[p])
+        if len(self.userLockTable[issuer]) == 0:
+            del(self.userLockTable[issuer])
+        self.lockSemaphore.release()
         print("Releasing lock for file: %s" %p)
 
-    def LockOwnedBy(p, issuer):
-        #TODO: test lock.
-        print ("asdf")
+    def LockOwnedBy(self, p, issuer):
+        return issuer in self.userLockTable and p in self.userLockTable[issuer]
         
         
 class HandleTypes:
@@ -96,7 +143,9 @@ class HandleTypes:
     RequestFileWrite = 2
     ReleaseFileWrite = 3
     RequestFileUpdate = 4
+    RequestDirectoryContents = 5
 
 class ExceptionTypes:
     FileNotFound = 0
     FileIsLocked = 1
+    DirectoryNotFound = 2
