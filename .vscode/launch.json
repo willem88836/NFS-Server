@@ -8,7 +8,7 @@
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
-            "program": "/home/willem-pc2/Documents/Projects/NFS-Server/src/Program.py",
+            "program": "D:\\Users\\wille\\Documents\\Projects\\NFS-Server\\src\\Program.py",
             "console": "integratedTerminal"
         }
     ]

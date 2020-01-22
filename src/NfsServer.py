@@ -1,5 +1,5 @@
+import Configuration
 from FileHandler import *
-import NfsBase
 import os
 from RpcServerThread import * 
 from socket import *
@@ -16,39 +16,10 @@ class NfsServer:
     isActive = True
     
     def __init__(self):
-        print("Initializing Server On port: %s" % NfsBase.Port)
-        self.SetNfsRoot()
-        self.connectionPort = NfsBase.Port
+        print("Initializing Server On port: %s" % Configuration.Port)
+        self.fileHandler = FileHandler(Configuration.GetRootDirectory())
+        self.connectionPort = Configuration.Port
         self.StartReceivingConnections()
-
-
-    def SetNfsRoot(self):
-        r = ""
-
-        if not os.path.isfile(NfsBase.RootLocation):
-            print("root directory not set")
-            if not os.path.isdir(NfsBase.ConfigPath):
-                os.makedirs(NfsBase.ConfigPath)
-
-            f = open(NfsBase.RootLocation, "w")
-            r = askdirectory()
-            f.writelines(r)
-            f.close()
-        else:
-            print("root directory set")
-            f = open(NfsBase.RootLocation, "r")
-            r = f.read()
-            f.close()
-
-            if not os.path.isdir(r):
-                print("could not find set root")
-                r = askdirectory()
-                f = open(NfsBase.RootLocation, "w")
-                f.write(r)
-
-            f.close()
-        
-        self.fileHandler = FileHandler(r)
 
 
     def StartReceivingConnections(self):
@@ -63,7 +34,7 @@ class NfsServer:
             print("Awaiting Connection...")
             clientSocket, clientIP = rpcSocket.accept()
             
-            rpcThread = RpcServerThread(clientSocket, clientIP, self)
+            rpcThread = RpcServerThread(clientSocket, clientIP, self, self.fileHandler)
             connectionSemaphore.acquire(self)
             self.currentConnections += 1
             connectionSemaphore.release()

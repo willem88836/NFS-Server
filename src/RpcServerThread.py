@@ -1,7 +1,7 @@
 import socket
 from socket import *
 import threading
-import NfsBase
+import Configuration
 from RpcMessage import *
 
 
@@ -13,7 +13,7 @@ class RpcServerThread(threading.Thread):
         self.ClientSocket = clientSocket
         self.ClientAddress = clientAddress
         self.NfsServer = nfsServer
-        self.Buffer = NfsBase.Buffer
+        self.Buffer = Configuration.Buffer
         self.RpcHandler = rpcHandler
         print("Initialized: %s" % self.name)
 
@@ -24,7 +24,7 @@ class RpcServerThread(threading.Thread):
             print("%s is awaiting messages..." % self.name)
 
             while isConnected:
-                message = self.ClientSocket.recv(NfsBase.Buffer).decode()
+                message = self.ClientSocket.recv(Configuration.Buffer).decode()
                 print("%s received message: %s" % (self.name, str(message)))
 
                 if message == "":

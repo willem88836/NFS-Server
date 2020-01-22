@@ -10,22 +10,22 @@ class FileHandler:
         print("File handler initialized.")
 
 
-    def Handle(requestType, args):
+    def Handle(self, requestType, args):
         #TODO: error if invalid root.
 
         if requestType == HandleTypes.ExceptionOccurred:
             print("error")    
         elif requestType == HandleTypes.RequestFileAccess:
             print ("file request")
-            HandleRequestFileAccess(args)
+            self.HandleRequestFileAccess(args)
         elif requestType == HandleTypes.ReleaseFileAccess:
             print ("release file")
         elif requestType == HandleTypes.RequestFileUpdate:
             print ("request file update")
 
 
-    def HandleRequestFileAccess(args):
-        completePath = Root + args
+    def HandleRequestFileAccess(self, args):
+        completePath = self.Root + args
 
 
 
