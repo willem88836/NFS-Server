@@ -28,7 +28,7 @@ class FileHandler:
 
 
     def HandleRequestFileRead(self, issuer, args):
-        p = self.root + '\\' + args
+        p = self.root + '/' + args
         print("file read requested: %s" % p)
 
         msg = None
@@ -41,34 +41,34 @@ class FileHandler:
         issuer.SendMessage(msg)
 
     def HandleRequestFileWrite(self, issuer, args):
-        p = self.root + '\\' + args
+        p = self.root + '/' + args
         print ("file write requested: %s" % p)
 
         msg = None
 
         if not os.path.isfile(p):
             msg = RpcMessage(HandleTypes.ExceptionOccurred, [ExceptionTypes.FileNotFound, args])
-        elif IsLocked(p) and not LockOwnedBy(p, issuer):
+        elif self.IsLocked(p) and not self.LockOwnedBy(p, issuer):
             msg = RpcMessage(HandleTypes.ExceptionOccurred, [ExceptionTypes.FileIsLocked, args])
-        elif LockOwnedBy(p, issuer):
+        elif self.LockOwnedBy(p, issuer):
             msg = RpcMessage(HandleTypes.RequestFileWrite, args)
         else:
-            CreateLock(p, issuer)
+            self.CreateLock(p, issuer)
             msg = RpcMessage(HandleTypes.RequestFileWrite, args)
 
         issuer.SendMessage(msg)
 
     def HandleReleaseFileWrite(self, issuer, args):
-        p = self.root + '\\' + args
+        p = self.root + '/' + args
         print ("File release: %s" % p)
 
         msg = None
 
         if not os.path.isfile(p):
             msg = RpcMessage(HandleTypes.ExceptionOccurred, [ExceptionTypes.FileNotFound, args])
-        elif IsLocked(p):
-            if LockOwnedBy(p, issuer):
-                ReleaseLock(p, issuer)
+        elif self.IsLocked(p):
+            if self.LockOwnedBy(p, issuer):
+                self.ReleaseLock(p, issuer)
                 msg = RpcMessage(HandleTypes.ReleaseFileWrite, args)
             else:
                 msg = RpcMessage(HandleTypes.ExceptionOccurred, [ExceptionTypes.FileIsLocked, args])
@@ -78,32 +78,36 @@ class FileHandler:
         issuer.SendMessage(msg)
 
 
-    def ReleaseAllLocks(issuer):
-        lockSemaphore.acquire(issuer)
-        for l in userLockTable[issuer]:
-            fileLockTable.remove(l)
-        userLockTable.remove(issuer)
-        lockSemaphore.release()
+    def ReleaseAllLocks(self, issuer):
+        self.lockSemaphore.acquire(issuer)
+        for l in self.userLockTable[issuer]:
+            del(self.fileLockTable[l])
+        del(self.userLockTable[issuer])
+        self.lockSemaphore.release()
 
-    def IsLocked(p):
-        return p in fileLockTable
+    def IsLocked(self, p):
+        return p in self.fileLockTable
 
-    def CreateLock(p, issuer):
-        lockSemaphore.acquire(issuer)
-        fileLockTable[p] = issuer
-        userLockTable[issuer].append(p)
-        lockSemaphore.release()
+    def CreateLock(self, p, issuer):
+        self.lockSemaphore.acquire(issuer)
+        self.fileLockTable[p] = issuer
+        if not issuer in self.userLockTable:
+            self.userLockTable[issuer] = []
+        self.userLockTable[issuer].append(p)
+        self.lockSemaphore.release()
         print("created lock for file: %s" % p)
 
-    def ReleaseLock(p, issuer):
-        lockSemaphore.acquire(issuer)
-        userLockTable[issuer].remove(p)
-        fileLockTable.remove(p)
-        lockSemaphore.release()
+    def ReleaseLock(self, p, issuer):
+        self.lockSemaphore.acquire(issuer)
+        self.userLockTable[issuer].remove(p)
+        del(self.fileLockTable[p])
+        if len(self.userLockTable[issuer]) == 0:
+            del(self.userLockTable[issuer])
+        self.lockSemaphore.release()
         print("Releasing lock for file: %s" %p)
 
-    def LockOwnedBy(p, issuer):
-        return p in userLockTable[issuer]
+    def LockOwnedBy(self, p, issuer):
+        return issuer in self.userLockTable and p in self.userLockTable[issuer]
         
         
 class HandleTypes:
