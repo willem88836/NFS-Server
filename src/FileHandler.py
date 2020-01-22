@@ -24,7 +24,7 @@ class FileHandler:
         elif requestType == HandleTypes.ReleaseFileWrite:
             self.HandleReleaseFileWrite(issuer, args)
         elif requestType == HandleTypes.RequestFileUpdate:
-            print ("request file update")
+            self.HandleFileUpdate(issuer, args)
         elif requestType == HandleTypes.RequestDirectoryContents:
             self.HandleDirectoryContents(issuer, args)
 
@@ -75,6 +75,20 @@ class FileHandler:
             
         issuer.SendMessage(msg)
         print ("File release: %s" % p)
+
+    def HandleFileUpdate(self, issuer, args):
+        p = self.root + '/' + args
+        msg = None
+
+        if not os.path.isfile(p):
+            msg = RpcMessage(HandleTypes.ExceptionOccurred, [ExceptionTypes.FileNotFound, args])
+        elif not self.LockOwnedBy(p, issuer):
+            msg = RpcMessage(HandleTypes.ExceptionOccurred, [ExceptionTypes.FileIsLocked, args])
+        else: 
+            msg = RpcMessage(HandleTypes.RequestFileUpdate, args)
+
+        issuer.SendMessage(msg)
+        print("File update requested: %s" % p)
 
     def HandleDirectoryContents(self, issuer, args):
         p = self.root + '/' + args
