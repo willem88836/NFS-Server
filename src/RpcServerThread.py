@@ -31,16 +31,16 @@ class RpcServerThread(threading.Thread):
                     isConnected = False
                     continue
                 
-                rpcMessage = RpcMessage(message)
-                self.RpcHandler.Handle(rpcMessage.Type, rpcMessage.Args)
+                rpcMessage = RpcMessage(None, None, message)
+                self.RpcHandler.Handle(self, rpcMessage.Type, rpcMessage.Args)
 
-        except Exception: 
-            print("An error occured. thread %s terminated" % self.name)
+        except Exception as e: 
+            print("An error occured: (%s). thread %s terminated" % (format(e), self.name))
 
         print("Thread %s closing..." % self.name)
         self.ClientSocket.close()
         self.NfsServer.CloseConnection(self)
 
-    def Sendmessage(message):
+    def SendMessage(self, message):
         print (message)
         #TODO: send message

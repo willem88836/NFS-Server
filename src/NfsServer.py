@@ -17,7 +17,7 @@ class NfsServer:
     
     def __init__(self):
         print("Initializing Server On port: %s" % Configuration.Port)
-        self.fileHandler = FileHandler(Configuration.GetRootDirectory())
+        self.fileHandler = FileHandler(self, Configuration.GetRootDirectory())
         self.connectionPort = Configuration.Port
         self.StartReceivingConnections()
 
