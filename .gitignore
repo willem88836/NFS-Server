@@ -1,2 +1,7 @@
 
-.vscode/launch.json
+!*.[Vv]scode/**
+
+.vscode/**
+*/launch.json
+*launch.json
+.vscode/
