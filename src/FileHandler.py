@@ -1,8 +1,13 @@
+import os
 from RpcMessage import *
 from RpcServerThread import *
-import os
+import threading
 
 class FileHandler:
+    lockSemaphore = threading.BoundedSemaphore(value=1)
+    fileLockTable = {}
+    userLockTable = {}
+
     def __init__(self, nfsServer, root):
         self.nfsServer = nfsServer
         self.root = root
@@ -73,21 +78,32 @@ class FileHandler:
         issuer.SendMessage(msg)
 
 
+    def ReleaseAllLocks(issuer):
+        lockSemaphore.acquire(issuer)
+        for l in userLockTable[issuer]:
+            fileLockTable.remove(l)
+        userLockTable.remove(issuer)
+        lockSemaphore.release()
+
     def IsLocked(p):
-        #TODO: Test lock
-        return False
+        return p in fileLockTable
 
     def CreateLock(p, issuer):
-        #TODO: Create lock
-        print("creating lock for file: %s" % p)
+        lockSemaphore.acquire(issuer)
+        fileLockTable[p] = issuer
+        userLockTable[issuer].append(p)
+        lockSemaphore.release()
+        print("created lock for file: %s" % p)
 
     def ReleaseLock(p, issuer):
-        #TODO: Release lock
+        lockSemaphore.acquire(issuer)
+        userLockTable[issuer].remove(p)
+        fileLockTable.remove(p)
+        lockSemaphore.release()
         print("Releasing lock for file: %s" %p)
 
     def LockOwnedBy(p, issuer):
-        #TODO: test lock.
-        print ("asdf")
+        return p in userLockTable[issuer]
         
         
 class HandleTypes:

@@ -38,6 +38,7 @@ class RpcServerThread(threading.Thread):
             print("An error occured: (%s). thread %s terminated" % (format(e), self.name))
 
         print("Thread %s closing..." % self.name)
+        self.RpcHandler.ReleaseAllLocks(self)
         self.ClientSocket.close()
         self.NfsServer.CloseConnection(self)
 
