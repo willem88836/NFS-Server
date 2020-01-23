@@ -3,4 +3,6 @@ from NfsClient import *
 from NfsServer import *
 
 localServer = NfsServer()
-# localClient = NfsClient()
+localServer.name = "ServerThread"
+
+localClient = NfsClient()

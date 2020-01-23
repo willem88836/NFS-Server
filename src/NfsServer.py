@@ -6,18 +6,21 @@ from socket import *
 import threading
 from tkinter.filedialog import askdirectory
 
-class NfsServer: 
+
+class NfsServer (threading.Thread): 
     connectionSemaphore = threading.BoundedSemaphore(value=1)
     currentConnections = 0
     maximumConnections = 5
     isActive = True
     
     def __init__(self):
+        threading.Thread.__init__(self)
         print("Initializing Server On port: %s" % Configuration.Port)
         self.fileHandler = FileHandler(self, Configuration.GetRootDirectory())
         self.connectionPort = Configuration.Port
-        self.StartReceivingConnections()
 
+    def run(self):
+        self.StartReceivingConnections()
 
     def StartReceivingConnections(self):
         rpcSocket = socket(AF_INET, SOCK_STREAM)
