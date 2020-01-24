@@ -2,6 +2,11 @@
 from NfsClient import *
 from NfsServer import *
 
-localServer = NfsServer()
-localServer.name = "ServerThread"
-localClient = NfsClient()
+import TkInterSubSystem
+
+# localServer = NfsServer()
+# localServer.name = "ServerThread"
+# localClient = NfsClient()
+
+# from TkInterSubSystem import *
+# s = TkInterSubSystem()

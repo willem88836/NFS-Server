@@ -4,6 +4,8 @@ import socket
 from socket import *
 import threading
 import json
+import tkinter.filedialog
+
 
 class NfsClient:
     
@@ -11,6 +13,8 @@ class NfsClient:
 
     def __init__(self):
         self.ConnectToServer()
+        self.explorer = tkinter.filedialog.Tk()
+        self.explorer.askdirectory()
 
     def ConnectToServer(self):
         serverList = Configuration.GetServerList()
@@ -21,10 +25,11 @@ class NfsClient:
             self.ConnectToServer()
         else: 
             for e in serverList:
+                print(e)
                 # TODO: Figure out what to do with the root directory
-                r = json.JSONDecoder.decode(e) 
-                connection = ClientConnection(e[0], e[1])
-                self.connections.append(connection) #TODO: continue here. 
+                # r = json.JSONDecoder.decode(e) 
+                # connection = ClientConnection(e[0], e[1])
+                # self.connections.append(connection) #TODO: continue here. 
 
     def PromptServerAddress(self):
         print("Fill in server address:")
