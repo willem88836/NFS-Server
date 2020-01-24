@@ -3,7 +3,8 @@ from RpcMessage import *
 import socket
 from socket import *
 import threading
-import json
+from ClientConnection import *
+
 
 class NfsClient:
     
@@ -20,11 +21,14 @@ class NfsClient:
             self.PromptServerAddress()
             self.ConnectToServer()
         else: 
-            for e in serverList:
-                # TODO: Figure out what to do with the root directory
-                r = json.JSONDecoder.decode(e) 
-                connection = ClientConnection(e[0], e[1])
-                self.connections.append(connection) #TODO: continue here. 
+            for entry in serverList:
+                # TODO: this does not seem like a healthy way to split.
+                entry = entry.split(sep=", ")
+                address = str(entry[0][2:len(entry[0]) - 1])
+                root = str(entry[1][1:len(entry[1]) - 2])
+
+                connection = ClientConnection(address, root)
+                self.connections.append(connection) 
 
     def PromptServerAddress(self):
         print("Fill in server address:")
@@ -32,26 +36,3 @@ class NfsClient:
         print("Fill in server root:")
         r = input()
         Configuration.AppendServerList([s, r])
-
-
-
-class ClientConnection (threading.Thread):
-    def __init__(self, s, r):
-        threading.Thread.__init__(self)
-        self.socket = socket(AF_INET, SOCK_STREAM)
-        self.socket.connection((s, Configuration.Port))
-
-        print("client ready to communicate")
-
-    def SendMessage(message):
-        self.socket.send(message)
-
-    def run(self):
-        self.isRunning = True
-
-        while self.isRunning:
-            message = self.socket.recv(Configuration.Buffer).decode()
-            print("%s received message: %s" % (self.name, str(message)))
-
-            message = RpcMessage(None, None, message)
-            

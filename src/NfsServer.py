@@ -6,7 +6,7 @@ from socket import *
 import threading
 from tkinter.filedialog import askdirectory
 
-
+#TODO: Create Server View
 class NfsServer (threading.Thread): 
     connectionSemaphore = threading.BoundedSemaphore(value=1)
     currentConnections = 0
