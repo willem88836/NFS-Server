@@ -1,12 +1,12 @@
 
-from NfsClient import *
+# from NfsClient import *
 from NfsServer import *
+from ClientView import *
 
-import TkInterSubSystem
+localServer = NfsServer()
+localServer.name = "ServerThread"
 
-# localServer = NfsServer()
-# localServer.name = "ServerThread"
-# localClient = NfsClient()
+clientView = ClientView()
 
 # from TkInterSubSystem import *
 # s = TkInterSubSystem()
