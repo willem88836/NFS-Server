@@ -22,13 +22,15 @@ class NfsClient:
             self.ConnectToServer()
         else: 
             for entry in serverList:
+                if entry == "":
+                    continue
                 # TODO: this does not seem like a healthy way to split.
                 entry = entry.split(sep=", ")
                 address = str(entry[0][2:len(entry[0]) - 1])
-                root = str(entry[1][1:len(entry[1]) - 2])
-
+                root = str(entry[1][1:len(entry[1]) - 3])
                 connection = ClientConnection(address, root)
-                self.connections.append(connection) 
+                connection.start()
+                self.connections.append(connection)
 
     def PromptServerAddress(self):
         print("Fill in server address:")

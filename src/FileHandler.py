@@ -2,6 +2,9 @@ import os
 from RpcMessage import *
 from RpcServerThread import *
 import threading
+import ExceptionTypes
+import HandleTypes
+
 
 class FileHandler:
     lockSemaphore = threading.BoundedSemaphore(value=1)
@@ -135,17 +138,4 @@ class FileHandler:
 
     def LockOwnedBy(self, p, issuer):
         return issuer in self.userLockTable and p in self.userLockTable[issuer]
-        
-        
-class HandleTypes:
-    ExceptionOccurred = 0
-    RequestFileRead = 1
-    RequestFileWrite = 2
-    ReleaseFileWrite = 3
-    RequestFileUpdate = 4
-    RequestDirectoryContents = 5
-
-class ExceptionTypes:
-    FileNotFound = 0
-    FileIsLocked = 1
-    DirectoryNotFound = 2
+   

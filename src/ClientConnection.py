@@ -6,20 +6,50 @@ from RpcMessage import *
 
 
 class ClientConnection (threading.Thread):
-    def __init__(self, address, root):
-        threading.Thread.__init__(self)
-        self.socket = socket(AF_INET, SOCK_STREAM)
-        self.socket.bind((address, Configuration.Port))
-        print("Client Connection Initialized to server (%s), with root (%s), and is ready to communicate..." % (address, root))
+    isConnected = False
+    isInitialized = False
 
-    def SendMessage(message):
-        self.socket.send(message)
+    def __init__(self, address, root):
+        print("starting connection")
+        threading.Thread.__init__(self)
+        self.address = address
+        self.root = root
+        self.socket = socket(AF_INET, SOCK_STREAM)
+        
+        try:
+            self.socket.bind((address, Configuration.Port))
+            self.isConnected = True
+            print("Client Connection Initialized to server (%s), with root (%s), and is ready to communicate..." % (address, root))
+        except Exception as e:
+            print("Could not open socket to server (%s), with root (%s), due to error (%s)" % (address, root, format(e)))
+        finally: 
+            self.isInitialized = True
+
+
+    def SendMessage(self, message):
+        while not self.isInitialized:
+            continue
+
+        if not self.isConnected:
+            return
+
+        msg = str(message.Wrap()).encode()
+        print("sending message (%s) to server (%s)" % (msg, self.address))
+        self.socket.send(msg)
 
     def run(self):
-        self.isRunning = True
+        if not self.isConnected:
+            return; 
 
+        self.isRunning = True
+        #TODO: This fails somehow. test this properly.
         while self.isRunning:
             message = self.socket.recv(Configuration.Buffer).decode()
             print("%s received message: %s" % (self.name, str(message)))
             message = RpcMessage(None, None, message)
-            
+    
+    def GetRoot(self):
+        return self.root
+
+    def GetAddress(self):
+        return self.address
