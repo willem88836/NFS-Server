@@ -7,3 +7,6 @@
 .vscode/
 
 ~/
+
+src/__pycache__/*
+*.pyc
