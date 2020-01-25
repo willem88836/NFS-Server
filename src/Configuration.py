@@ -46,6 +46,7 @@ def GetServerList():
         f = open(ServerLocation, "x")
         f.write("")
         f.close()
+        return [""]
     else:
         f = open(ServerLocation, "r")
         l = f.readlines()
