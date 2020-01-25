@@ -17,7 +17,7 @@ class ClientConnection (threading.Thread):
         self.socket = socket(AF_INET, SOCK_STREAM)
         
         try:
-            self.socket.bind((address, Configuration.Port))
+            self.socket.connect((address, Configuration.Port))
             self.isConnected = True
             print("Client Connection Initialized to server (%s), with root (%s), and is ready to communicate..." % (address, root))
         except Exception as e:
