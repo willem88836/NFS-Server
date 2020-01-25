@@ -2,8 +2,8 @@ import os
 from RpcMessage import *
 from RpcServerThread import *
 import threading
-import ExceptionTypes
-import HandleTypes
+from ExceptionTypes import ExceptionTypes
+from HandleTypes import HandleTypes
 
 
 class FileHandler:
