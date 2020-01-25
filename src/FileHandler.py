@@ -19,7 +19,7 @@ class FileHandler:
 
     def Handle(self, issuer, requestType, args):
         if requestType == HandleTypes.ExceptionOccurred:
-            print("error")
+            issuer.Terminate()
         elif requestType == HandleTypes.RequestFileRead:
             self.HandleRequestFileRead(issuer, args)
         elif requestType == HandleTypes.RequestFileWrite:
