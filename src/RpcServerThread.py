@@ -20,7 +20,7 @@ class RpcServerThread(threading.Thread):
     def run(self):
         try:
             isConnected = True
-
+            
             print("%s is awaiting messages..." % self.name)
 
             while isConnected:
@@ -35,11 +35,11 @@ class RpcServerThread(threading.Thread):
                 self.RpcHandler.Handle(self, rpcMessage.Type, rpcMessage.Args)
         except Exception as e: 
             print("An error occured: (%s). thread %s terminated" % (format(e), self.name))
-
-        print("Thread %s closing..." % self.name)
-        self.RpcHandler.ReleaseAllLocks(self)
-        self.ClientSocket.close()
-        self.NfsServer.CloseConnection(self)
+        finally:
+            print("Thread %s closing..." % self.name)
+            self.RpcHandler.ReleaseAllLocks(self)
+            self.ClientSocket.close()
+            self.NfsServer.CloseConnection(self)
 
     def SendMessage(self, message):
         msg = str(message.Wrap()).encode()

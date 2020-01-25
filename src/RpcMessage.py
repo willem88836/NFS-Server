@@ -11,8 +11,11 @@ class RpcMessage:
             self.Args = args
 
     def Unwrap(self, message):
-        self.Type = int(message[0:1])
-        self.Args = message[1:len(message)]
+        #TODO: This code looks evil. I don't like that. Improve this.
+        msg = str(message[1:len(message)-1])
+        msg = msg.split(", ")
+        self.Type = int(msg[0])
+        self.Args = msg[1][1:len(msg[1])-1]
         
     def Wrap(self):
         wrap = [self.Type, self.Args]
