@@ -13,9 +13,8 @@ class RpcMessage:
     def Unwrap(self, message):
         #TODO: This code looks evil. I don't like that. Improve this.
         msg = str(message[1:len(message)-1])
-        msg = msg.split(", ")
         self.Type = int(msg[0])
-        self.Args = msg[1][1:len(msg[1])-1]
+        self.Args = msg[3:len(msg)]
         
     def Wrap(self):
         wrap = [self.Type, self.Args]

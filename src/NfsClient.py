@@ -26,6 +26,7 @@ class NfsClient:
             address = str(entry[0][2:len(entry[0]) - 1])
             root = str(entry[1][1:len(entry[1]) - 3])
             connection = ClientConnection(self, address, root)
+            connection.name = "ClientConnection%s" % entry
             connection.start()
             self.connections.append(connection)
     
@@ -38,27 +39,35 @@ class NfsClient:
         Configuration.AppendServerList([s, r])
 
 
-    def OnMessageReceived(self, requestType, args):
+    def SendError(self, server):
+        message =  RpcMessage(t=HandleTypes.ExceptionOccurred, args="")
+        for c in self.connections:
+            if c.GetAddress() == server:
+                c.SendMessage(message)
+                break
+
+
+    def OnMessageReceived(self, server, requestType, args):
         if requestType == HandleTypes.ExceptionOccurred:
             print("error")
         elif requestType == HandleTypes.RequestFileRead:
-            self.OnFileReadGranted(args)
+            self.OnFileReadGranted(server, args)
         elif requestType == HandleTypes.RequestFileWrite:
-            self.OnFileWriteGranted(args)
+            self.OnFileWriteGranted(server, args)
         elif requestType == HandleTypes.ReleaseFileWrite:
-            self.OnFileRelease(args)
+            self.OnFileRelease(server, args)
         elif requestType == HandleTypes.RequestFileUpdate:
-            self.OnFileUpdateGranted(args)
+            self.OnFileUpdateGranted(server, args)
         elif requestType == HandleTypes.RequestDirectoryContents:
-            self.OnDirectoryContentsReceived(args)
+            self.OnDirectoryContentsReceived(server, args)
 
-    def OnFileReadGranted(self, args):
+    def OnFileReadGranted(self, server, args):
         return
-    def OnFileWriteGranted(self, args):
+    def OnFileWriteGranted(self, server, args):
         return
-    def OnFileRelease(self, args):
+    def OnFileRelease(self, server, args):
         return
-    def OnFileUpdateGranted(self, args):
+    def OnFileUpdateGranted(self, server, args):
         return
-    def OnDirectoryContentsReceived(self, args):
+    def OnDirectoryContentsReceived(self, server, args):
         return
