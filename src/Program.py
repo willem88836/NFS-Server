@@ -7,7 +7,4 @@ localServer = NfsServer()
 localServer.name = "ServerThread"
 localServer.start()
 
-#clientView = ClientView()
-
-# from TkInterSubSystem import *
-# s = TkInterSubSystem()
+clientView = ClientView()
