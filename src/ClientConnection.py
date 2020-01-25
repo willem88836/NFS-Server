@@ -9,9 +9,10 @@ class ClientConnection (threading.Thread):
     isConnected = False
     isInitialized = False
 
-    def __init__(self, address, root):
+    def __init__(self, parent, address, root):
         print("starting connection")
         threading.Thread.__init__(self)
+        self.parent = parent
         self.address = address
         self.root = root
         self.socket = socket(AF_INET, SOCK_STREAM)
@@ -47,6 +48,7 @@ class ClientConnection (threading.Thread):
             message = self.socket.recv(Configuration.Buffer).decode()
             print("%s received message: %s" % (self.name, str(message)))
             message = RpcMessage(None, None, message)
+            self.parent.OnMessageReceived(message.Type, message.Args)
     
     def GetRoot(self):
         return self.root
