@@ -96,18 +96,19 @@ class FileHandler:
     def HandleDirectoryContents(self, issuer, args):
         p = self.root + args
         msg = None
-
+        
         if not os.path.isdir(p):
             msg = RpcMessage(HandleTypes.ExceptionOccurred, [ExceptionTypes.DirectoryNotFound, args])
         else:
             dirEntries = os.listdir(p)
-            for e in dirEntries:
+            for i in range(len(dirEntries)):
+                e = self.root + "/" + dirEntries[i]
                 if (os.path.isfile(e)):
-                    e = "f" + e 
+                    dirEntries[i] = "f" + dirEntries[i] 
                 elif os.path.isdir(e):
-                    e = "d" + e
+                    dirEntries[i] = "d" + dirEntries[i]
                 else:
-                    e = "o" + e
+                    dirEntries[i] = "o" + dirEntries[i]
 
             msg = RpcMessage(HandleTypes.RequestDirectoryContents, [args, dirEntries])
         
