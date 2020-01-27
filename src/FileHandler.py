@@ -100,8 +100,16 @@ class FileHandler:
         if not os.path.isdir(p):
             msg = RpcMessage(HandleTypes.ExceptionOccurred, [ExceptionTypes.DirectoryNotFound, args])
         else:
-            dirs = os.listdir(p)
-            msg = RpcMessage(HandleTypes.RequestDirectoryContents, [args, dirs])
+            dirEntries = os.listdir(p)
+            for e in dirEntries:
+                if (os.path.isfile(e)):
+                    e = "f" + e 
+                elif os.path.isdir(e):
+                    e = "d" + e
+                else:
+                    e = "o" + e
+
+            msg = RpcMessage(HandleTypes.RequestDirectoryContents, [args, dirEntries])
         
         issuer.SendMessage(msg)
         print("Directory contents requested: %s" % p)

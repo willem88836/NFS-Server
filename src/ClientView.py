@@ -34,7 +34,7 @@ class ClientView(NfsClient):
         
         if not truple[2][len(truple[2])-1] == "/":
             truple[2] += "/"
-        truple[2] += selection
+        truple[2] += selection[6 : len(selection) - 1]
         self.RequestFillView(truple)
 
     def BuildTabs(self):
@@ -88,5 +88,15 @@ class ClientView(NfsClient):
         listbox.delete(0, END)
 
         for i in range(len(args)):
-            listbox.insert(i, args[i])
+            current = args[i]
+            
+            prefix
+            if current[0] == "f":
+                prefix = "(fil) "
+            elif current[0] == "d":
+                prefix = "(dir) "
+            elif current[0] == "o":
+                prefix = "(oth) "
+
+            listbox.insert(i, prefix + current[1:len(current) - 1])
             
