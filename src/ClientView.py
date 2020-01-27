@@ -74,23 +74,8 @@ class ClientView(NfsClient):
             return
 
         #TODO: Magic!
-
-        print()
-        print()
-        print()
-        print()
-        print()
-        print()
-        print (args)
-        print()
-        print()
-        print()
-        print()
-        print()
-        print()
-        print()
-
-        args = args[7:len(args)-3].split("', '")
+        args = args.split("', [")[1]
+        args = args[1:len(args)-2].split("', '")
         
         tab = truple[0]
         
