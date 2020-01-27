@@ -33,7 +33,7 @@ class FileHandler:
 
 
     def HandleRequestFileRead(self, issuer, args):
-        p = self.root + '/' + args
+        p = self.root + args
         msg = None
 
         if not os.path.isfile(p):
@@ -45,7 +45,7 @@ class FileHandler:
         print("file read requested: %s" % p)
 
     def HandleRequestFileWrite(self, issuer, args):
-        p = self.root + '/' + args
+        p = self.root + args
         msg = None
 
         if not os.path.isfile(p):
@@ -62,7 +62,7 @@ class FileHandler:
         print ("file write requested: %s" % p)
 
     def HandleReleaseFileWrite(self, issuer, args):
-        p = self.root + '/' + args
+        p = self.root + args
         msg = None
 
         if not os.path.isfile(p):
@@ -80,7 +80,7 @@ class FileHandler:
         print ("File release: %s" % p)
 
     def HandleFileUpdate(self, issuer, args):
-        p = self.root + '/' + args
+        p = self.root + args
         msg = None
 
         if not os.path.isfile(p):
@@ -94,7 +94,7 @@ class FileHandler:
         print("File update requested: %s" % p)
 
     def HandleDirectoryContents(self, issuer, args):
-        p = self.root + '/' + args
+        p = self.root + args
         msg = None
 
         if not os.path.isdir(p):

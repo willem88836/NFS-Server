@@ -31,7 +31,9 @@ class ClientView(NfsClient):
                     break
             if not truple == None:
                 break
-
+        
+        if not truple[2][len(truple[2])-1] == "/":
+            truple[2] += "/"
         truple[2] += selection
         self.RequestFillView(truple)
 
@@ -52,7 +54,7 @@ class ClientView(NfsClient):
             listbox.bind("<Double-Button-1>", self.OnDirectoryClick)
             listbox.pack(side=LEFT, fill=BOTH)
 
-            truple = [tab, connection, ""]
+            truple = [tab, connection, "/"]
             self.tabs.append(truple)
             self.RequestFillView(truple)
 
@@ -72,6 +74,22 @@ class ClientView(NfsClient):
             return
 
         #TODO: Magic!
+
+        print()
+        print()
+        print()
+        print()
+        print()
+        print()
+        print (args)
+        print()
+        print()
+        print()
+        print()
+        print()
+        print()
+        print()
+
         args = args[7:len(args)-3].split("', '")
         
         tab = truple[0]
