@@ -14,7 +14,7 @@ class RpcMessage:
         #TODO: This code looks evil. I don't like that. Improve this.
         msg = str(message[1:len(message)-1])
         self.Type = int(msg[0])
-        self.Args = msg[3:len(msg)]
+        self.Args = msg[4:len(msg)-1]
         
     def Wrap(self):
         wrap = [self.Type, self.Args]
