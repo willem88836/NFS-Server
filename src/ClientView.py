@@ -34,8 +34,12 @@ class ClientView(NfsClient):
         
         if not truple[2][len(truple[2])-1] == "/":
             truple[2] += "/"
-        truple[2] += selection[6 : len(selection) - 1]
-        self.RequestFillView(truple)
+        truple[2] += selection[6 : len(selection)]
+
+        if selection[1] == "d":
+            self.RequestFillView(truple)
+        else: 
+            print("a file is selected")
 
     def BuildTabs(self):
         tabControl = ttk.Notebook(self.view)
@@ -90,6 +94,10 @@ class ClientView(NfsClient):
         for i in range(len(args)):
             current = args[i]
             
+            if current == "":
+                continue
+
+            #TODO: All this string comparison stuff sucks.. Integrate Json or something, and use more objects.
             prefix = None
             if current[0] == "f":
                 prefix = "(fil) "
