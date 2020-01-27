@@ -90,7 +90,7 @@ class ClientView(NfsClient):
         for i in range(len(args)):
             current = args[i]
             
-            prefix
+            prefix = None
             if current[0] == "f":
                 prefix = "(fil) "
             elif current[0] == "d":
@@ -98,5 +98,5 @@ class ClientView(NfsClient):
             elif current[0] == "o":
                 prefix = "(oth) "
 
-            listbox.insert(i, prefix + current[1:len(current) - 1])
+            listbox.insert(i, prefix + current[1:len(current)])
             
