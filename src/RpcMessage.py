@@ -28,9 +28,9 @@ class RpcMessage:
             self.Type = t
             self.Args = args
 
-    def Deserialize(self, deserializable):
+    def Deserialize(self, serialized):
         #TODO: This code looks evil. I don't like that. Improve this.
-        msg = str(deserializable[1:len(deserializable)-1])
+        msg = str(serialized[1:len(serialized)-1])
         self.Type = int(msg[0])
         self.Args = msg[3 : len(msg)]
         
@@ -62,6 +62,26 @@ class ExceptionMessage(RpcMessage):
 
         self.ExceptionType = serialized[1]
         self.ExceptionArgs = serialized[4 : len(serialized) - 2]
+
+
+class FileReadMessage(RpcMessage):
+    File = ""
+
+
+    def __init__(self, file, serialized = None):
+        self.File = file
+
+        RpcMessage.__init__(self, 
+            HandleTypes.RequestFileRead,
+            file,
+            serialized)
+
+    def Serialize(self):
+        return str([self.Type, self.File])
+
+    def Deserialize(self, serialized):
+        RpcMessage.Deserialize(self, serialized)
+        self.File = self.Args
 
 
 class DirectoryMessage(RpcMessage):
