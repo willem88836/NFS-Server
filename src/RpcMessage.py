@@ -84,6 +84,66 @@ class FileReadMessage(RpcMessage):
         self.File = self.Args
 
 
+class FileWriteMessage(RpcMessage):
+    File = ""
+
+
+    def __init__(self, file, serialized = None):
+        self.File = file
+
+        RpcMessage.__init__(self, 
+            HandleTypes.RequestFileWrite,
+            file,
+            serialized)
+
+    def Serialize(self):
+        return str([self.Type, self.File])
+
+    def Deserialize(self, serialized):
+        RpcMessage.Deserialize(self, serialized)
+        self.File = self.Args
+
+
+class FileReleaseMessage(RpcMessage):
+    File = ""
+
+
+    def __init__(self, file, serialized = None):
+        self.File = file
+
+        RpcMessage.__init__(self, 
+            HandleTypes.ReleaseFileWrite,
+            file,
+            serialized)
+
+    def Serialize(self):
+        return str([self.Type, self.File])
+
+    def Deserialize(self, serialized):
+        RpcMessage.Deserialize(self, serialized)
+        self.File = self.Args
+
+
+class FileUpdateMessage(RpcMessage):
+    File = ""
+
+
+    def __init__(self, file, serialized = None):
+        self.File = file
+
+        RpcMessage.__init__(self, 
+            HandleTypes.RequestFileUpdate,
+            file,
+            serialized)
+
+    def Serialize(self):
+        return str([self.Type, self.File])
+
+    def Deserialize(self, serialized):
+        RpcMessage.Deserialize(self, serialized)
+        self.File = self.Args
+
+
 class DirectoryMessage(RpcMessage):
     BaseDirectory = ""
     Directories = []
