@@ -1,6 +1,5 @@
 import Configuration
 from ClientConnection import *
-from HandleTypes import HandleTypes
 from RpcMessage import *
 import socket
 from socket import *

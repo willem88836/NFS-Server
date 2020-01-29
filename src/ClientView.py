@@ -1,4 +1,3 @@
-from HandleTypes import HandleTypes
 from NfsClient import *
 import tkinter as tk
 from tkinter import *
