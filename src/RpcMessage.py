@@ -1,4 +1,5 @@
       
+# Used to define what type of RPC is sent. 
 class HandleTypes:
     ExceptionOccurred = 0
     RequestFileRead = 1
@@ -7,10 +8,17 @@ class HandleTypes:
     RequestFileUpdate = 4
     RequestDirectoryContents = 5
 
+# Used to define what type of error occurred. 
+class ExceptionTypes:
+    FileNotFound = 0
+    FileIsLocked = 1
+    DirectoryNotFound = 2
 
+
+# Base Class for all RpcMessages.
 class RpcMessage: 
     Type = None
-    Args = None
+    Args = None # Unformatted Args!
 
     def __init__(self, t, args, serialized = None):
         if (serialized != None):
@@ -30,7 +38,6 @@ class RpcMessage:
         return wrap
 
 
-
 class ExceptionMessage(RpcMessage):
     ExceptionType = 0
     ExceptionArgs = ""
@@ -48,26 +55,23 @@ class ExceptionMessage(RpcMessage):
         serialized = self.Args
 
 
-
-
-
 class DirectoryMessage(RpcMessage):
-    BaseDirectories = ""
+    BaseDirectory = ""
     Directories = []
     Files = []
 
-    def __init__(self, baseDirectories, directories, files):
+    def __init__(self, baseDirectories, directories, files, serialized = None):
+        self.BaseDirectory = baseDirectories
+        self.Directories = directories
+        self.Files = files
+        
         RpcMessage.__init__(self, 
             HandleTypes.RequestDirectoryContents, 
             [baseDirectories, directories, files], 
-            None)
-
-        self.BaseDirectories = baseDirectories
-        self.Directories = directories
-        self.Files = files
+            serialized)
 
     def Serialize(self):
-        return str([self.Type, self.BaseDirectories, self.Directories, self.Files])
+        return str([self.Type, self.BaseDirectory, self.Directories, self.Files])
     
     def Deserialize(self, serialized):
         RpcMessage.Deserialize(self, serialized)
@@ -75,10 +79,12 @@ class DirectoryMessage(RpcMessage):
 
         args = serialized.split(", ['")
         
+        #grabs the root dir. 
         baseDir = args[0][1 : len(args[0]) - 1]
         dirEntries = []
         fileEntries = []
         
+        # grabs the listed directories. 
         dirs = args[1].split("', '")
         dirCount = len(dirs)
         for i in range(dirCount): 
@@ -89,6 +95,7 @@ class DirectoryMessage(RpcMessage):
                 d = dirs[i]
             dirEntries.append(d)
 
+        # grabs the listed files. 
         files = args[2].split("', '")
         fileCount = len(files)
         for i in range(fileCount):
@@ -100,8 +107,7 @@ class DirectoryMessage(RpcMessage):
             fileEntries.append(f)
 
 
-        self.BaseDirectories = baseDir
+        self.BaseDirectory = baseDir
         self.Directories = dirEntries
         self.Files = fileEntries
         
-        self.Args = [self.BaseDirectories, self.Directories, self.Files]
