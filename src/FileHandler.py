@@ -16,6 +16,8 @@ class FileHandler:
         self.root = root
         print("File handler initialized.")
 
+        self.HandleDirectoryContents(None, "")
+
 
     def Handle(self, issuer, requestType, args):
         if requestType == HandleTypes.ExceptionOccurred:
@@ -101,17 +103,25 @@ class FileHandler:
             msg = RpcMessage(HandleTypes.ExceptionOccurred, [ExceptionTypes.DirectoryNotFound, args])
         else:
             dirEntries = os.listdir(p)
-            for i in range(len(dirEntries)):
-                e = self.root + "/" + dirEntries[i]
-                if (os.path.isfile(e)):
-                    dirEntries[i] = "f" + dirEntries[i] 
-                elif os.path.isdir(e):
-                    dirEntries[i] = "d" + dirEntries[i]
-                else:
-                    dirEntries[i] = "o" + dirEntries[i]
 
-            msg = RpcMessage(HandleTypes.RequestDirectoryContents, [args, dirEntries])
+            files = []
+            directories = []
+
+            for e in dirEntries:
+                p = self.root + '/' + e
+                if os.path.isdir(p):
+                    directories.append(e)
+                elif os.path.isfile(p):
+                    files.append(e)
+                else:
+                    print("found object that is not supported: %s" % p)
+            
+            args = [args, directories, files]
+
+            print (args)
+            msg = RpcMessage(HandleTypes.RequestDirectoryContents, args)
         
+        return
         issuer.SendMessage(msg)
         print("Directory contents requested: %s" % p)
 
