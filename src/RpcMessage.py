@@ -20,6 +20,7 @@ class RpcMessage:
     Type = None
     Args = None # Unformatted Args!
 
+
     def __init__(self, t, args, serialized = None):
         if (serialized != None):
             self.Deserialize(serialized)
@@ -34,31 +35,40 @@ class RpcMessage:
         self.Args = msg[3 : len(msg)]
         
     def Serialize(self):
-        wrap = [self.Type, self.Args]
-        return wrap
+        return str([self.Type, self.Args])
 
 
+# Specialized RpcMessage for Exceptions
 class ExceptionMessage(RpcMessage):
-    ExceptionType = 0
-    ExceptionArgs = ""
+    ExceptionType = 0 # see: ExceptionTypes
+    ExceptionArgs = "" # Unformatted args of whatever call failed.
 
-    def __init__(self, exceptionType, args):
+
+    def __init__(self, exceptionType, exceptionArgs, serialized = None):
+        self.ExceptionType = exceptionType
+        self.ExceptionArgs = exceptionArgs
+
         RpcMessage.__init__(self, 
-        HandleTypes.ExceptionOccurred, 
-        [exceptionType, args])
+            HandleTypes.ExceptionOccurred, 
+            [exceptionType, exceptionArgs], 
+            serialized)
 
     def Serialize(self):
-        return str(self.Args)
+        return str([self.Type, self.ExceptionType, self.ExceptionArgs])
 
     def Deserialize(self, serialized):
         RpcMessage.Deserialize(self, serialized)
         serialized = self.Args
+
+        self.ExceptionType = serialized[1]
+        self.ExceptionArgs = serialized[4 : len(serialized) - 2]
 
 
 class DirectoryMessage(RpcMessage):
     BaseDirectory = ""
     Directories = []
     Files = []
+
 
     def __init__(self, baseDirectories, directories, files, serialized = None):
         self.BaseDirectory = baseDirectories
