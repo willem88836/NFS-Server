@@ -39,7 +39,7 @@ class NfsClient:
 
 
     def SendError(self, server):
-        message =  RpcMessage(t=HandleTypes.ExceptionOccurred, args="")
+        message = ExceptionMessage(ExceptionTypes.UnspecifiedError, "")
         for c in self.connections:
             if c.GetAddress() == server:
                 c.SendMessage(message)

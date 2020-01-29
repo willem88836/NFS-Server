@@ -13,6 +13,7 @@ class ExceptionTypes:
     FileNotFound = 0
     FileIsLocked = 1
     DirectoryNotFound = 2
+    UnspecifiedError = 3
 
 
 # Base Class for all RpcMessages.
