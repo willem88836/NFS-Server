@@ -14,91 +14,94 @@ class FileHandler:
         self.root = root
         print("File handler initialized.")
 
-        self.HandleDirectoryContents(None, "")
 
-
-    def Handle(self, issuer, requestType, args):
-        if requestType == HandleTypes.ExceptionOccurred:
+    def Handle(self, issuer, rpcMessage):
+        if rpcMessage.Type == HandleTypes.ExceptionOccurred:
             issuer.Terminate()
-        elif requestType == HandleTypes.RequestFileRead:
-            self.HandleRequestFileRead(issuer, args)
-        elif requestType == HandleTypes.RequestFileWrite:
-            self.HandleRequestFileWrite(issuer, args)
-        elif requestType == HandleTypes.ReleaseFileWrite:
-            self.HandleReleaseFileWrite(issuer, args)
-        elif requestType == HandleTypes.RequestFileUpdate:
-            self.HandleFileUpdate(issuer, args)
-        elif requestType == HandleTypes.RequestDirectoryContents:
-            self.HandleDirectoryContents(issuer, args)
+        elif rpcMessage.Type == HandleTypes.RequestFileRead:
+            fileReadMessage = FileReadMessage(None).Deserialize(rpcMessage.Args)
+            self.HandleRequestFileRead(issuer, fileReadMessage)
+        elif rpcMessage.Type == HandleTypes.RequestFileWrite:
+            fileWriteMessage = FileWriteMessage(None).Deserialize(rpcMessage.Args)
+            self.HandleRequestFileWrite(issuer, fileWriteMessage)
+        elif rpcMessage.Type == HandleTypes.ReleaseFileWrite:
+            fileReleaseMessage = FileReleaseMessage(None).Deserialize(rpcMessage.Args)
+            self.HandleReleaseFileWrite(issuer, fileReleaseMessage)
+        elif rpcMessage.Type == HandleTypes.RequestFileUpdate:
+            fileUpdateMessage = FileUpdateMessage(None).Deserialize(rpcMessage.Args)
+            self.HandleFileUpdate(issuer, fileUpdateMessage)
+        elif rpcMessage.Type == HandleTypes.RequestDirectoryContents:
+            directoryMessage = DirectoryMessage(None, None, None).Deserialize(rpcMessage.Args)
+            self.HandleDirectoryContents(issuer, directoryMessage)
 
 
-    def HandleRequestFileRead(self, issuer, args):
-        p = self.root + args
+    def HandleRequestFileRead(self, issuer, message):
+        p = self.root + message.File
         msg = None
 
         if not os.path.isfile(p):
-            msg = RpcMessage(HandleTypes.ExceptionOccurred, [ExceptionTypes.FileNotFound, args])
+            msg = ExceptionMessage(ExceptionTypes.FileNotFound, message.Serialize())
         else:
-            msg = RpcMessage(HandleTypes.RequestFileRead, args)
+            msg = FileReadMessage(message.File)
         
         issuer.SendMessage(msg)
         print("file read requested: %s" % p)
 
-    def HandleRequestFileWrite(self, issuer, args):
-        p = self.root + args
+    def HandleRequestFileWrite(self, issuer, message):
+        p = self.root + message.File
         msg = None
 
         if not os.path.isfile(p):
-            msg = RpcMessage(HandleTypes.ExceptionOccurred, [ExceptionTypes.FileNotFound, args])
+            msg = ExceptionMessage(ExceptionTypes.FileNotFound, message.Serialize())
         elif self.IsLocked(p) and not self.LockOwnedBy(p, issuer):
-            msg = RpcMessage(HandleTypes.ExceptionOccurred, [ExceptionTypes.FileIsLocked, args])
+            msg = ExceptionMessage(ExceptionTypes.FileIsLocked, message.Serialize())
         elif self.LockOwnedBy(p, issuer):
-            msg = RpcMessage(HandleTypes.RequestFileWrite, args)
+            msg = FileWriteMessage(message.File)
         else:
             self.CreateLock(p, issuer)
-            msg = RpcMessage(HandleTypes.RequestFileWrite, args)
+            msg = FileWriteMessage(message.File)
 
         issuer.SendMessage(msg)
         print ("file write requested: %s" % p)
 
-    def HandleReleaseFileWrite(self, issuer, args):
-        p = self.root + args
+    def HandleReleaseFileWrite(self, issuer, message):
+        p = self.root + message.File
         msg = None
 
         if not os.path.isfile(p):
-            msg = RpcMessage(HandleTypes.ExceptionOccurred, [ExceptionTypes.FileNotFound, args])
+            msg = ExceptionMessage(ExceptionTypes.FileNotFound, message.Serialize())
         elif self.IsLocked(p):
             if self.LockOwnedBy(p, issuer):
                 self.ReleaseLock(p, issuer)
-                msg = RpcMessage(HandleTypes.ReleaseFileWrite, args)
+                msg = FileReleaseMessage(message.File)
             else:
-                msg = RpcMessage(HandleTypes.ExceptionOccurred, [ExceptionTypes.FileIsLocked, args])
+                msg = ExceptionMessage(ExceptionTypes.FileIsLocked, message.Serialize())
         else:
-            msg = RpcMessage(HandleTypes.ReleaseFileWrite, args)
+            msg = FileReleaseMessage(message.File)
             
         issuer.SendMessage(msg)
         print ("File release: %s" % p)
 
-    def HandleFileUpdate(self, issuer, args):
-        p = self.root + args
+    def HandleFileUpdate(self, issuer, message):
+        p = self.root + message.File
         msg = None
 
         if not os.path.isfile(p):
-            msg = RpcMessage(HandleTypes.ExceptionOccurred, [ExceptionTypes.FileNotFound, args])
+            msg = ExceptionMessage(ExceptionTypes.FileNotFound, message.Serialize())
         elif not self.LockOwnedBy(p, issuer):
-            msg = RpcMessage(HandleTypes.ExceptionOccurred, [ExceptionTypes.FileIsLocked, args])
+            msg = ExceptionMessage(ExceptionTypes.FileIsLocked, message.Serialize())
         else: 
-            msg = RpcMessage(HandleTypes.RequestFileUpdate, args)
+            msg = FileUpdateMessage(message.File)
 
         issuer.SendMessage(msg)
         print("File update requested: %s" % p)
 
-    def HandleDirectoryContents(self, issuer, args):
-        p = self.root + args
+    def HandleDirectoryContents(self, issuer, message):
+        p = self.root + message.BaseDirectory
         msg = None
         
         if not os.path.isdir(p):
-            msg = RpcMessage(HandleTypes.ExceptionOccurred, [ExceptionTypes.DirectoryNotFound, args])
+            msg = ExceptionMessage(ExceptionTypes.DirectoryNotFound, message.Serialize())
         else:
             dirEntries = os.listdir(p)
 
@@ -114,12 +117,8 @@ class FileHandler:
                 else:
                     print("found object that is not supported: %s" % p)
             
-            args = [args, directories, files]
-
-            print (args)
-            msg = RpcMessage(HandleTypes.RequestDirectoryContents, args)
+            msg = DirectoryMessage(message.BaseDirectory, directories, files)
         
-        return
         issuer.SendMessage(msg)
         print("Directory contents requested: %s" % p)
 

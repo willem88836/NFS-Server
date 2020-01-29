@@ -32,7 +32,7 @@ class RpcServerThread(threading.Thread):
                     continue
                 
                 rpcMessage = RpcMessage(None, None, message)
-                self.RpcHandler.Handle(self, rpcMessage.Type, rpcMessage.Args)
+                self.RpcHandler.Handle(self, rpcMessage)
         except Exception as e: 
             print("An error occured: (%s). thread %s terminated" % (format(e), self.name))
         finally:

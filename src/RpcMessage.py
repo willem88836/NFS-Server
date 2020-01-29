@@ -41,7 +41,7 @@ class RpcMessage:
 # Specialized RpcMessage for Exceptions
 class ExceptionMessage(RpcMessage):
     ExceptionType = 0 # see: ExceptionTypes
-    ExceptionArgs = "" # Unformatted args of whatever call failed.
+    ExceptionArgs = "" # Serialized RPC call that failed
 
 
     def __init__(self, exceptionType, exceptionArgs, serialized = None):
@@ -63,6 +63,8 @@ class ExceptionMessage(RpcMessage):
         self.ExceptionType = serialized[1]
         self.ExceptionArgs = serialized[4 : len(serialized) - 2]
 
+        return self
+
 
 class FileReadMessage(RpcMessage):
     File = ""
@@ -82,6 +84,8 @@ class FileReadMessage(RpcMessage):
     def Deserialize(self, serialized):
         RpcMessage.Deserialize(self, serialized)
         self.File = self.Args
+
+        return self
 
 
 class FileWriteMessage(RpcMessage):
@@ -103,6 +107,8 @@ class FileWriteMessage(RpcMessage):
         RpcMessage.Deserialize(self, serialized)
         self.File = self.Args
 
+        return self
+
 
 class FileReleaseMessage(RpcMessage):
     File = ""
@@ -123,6 +129,8 @@ class FileReleaseMessage(RpcMessage):
         RpcMessage.Deserialize(self, serialized)
         self.File = self.Args
 
+        return self
+
 
 class FileUpdateMessage(RpcMessage):
     File = ""
@@ -142,6 +150,8 @@ class FileUpdateMessage(RpcMessage):
     def Deserialize(self, serialized):
         RpcMessage.Deserialize(self, serialized)
         self.File = self.Args
+
+        return self
 
 
 class DirectoryMessage(RpcMessage):
@@ -201,3 +211,4 @@ class DirectoryMessage(RpcMessage):
         self.Directories = dirEntries
         self.Files = fileEntries
         
+        return self
