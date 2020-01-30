@@ -21,13 +21,27 @@ class RpcMessage:
     Type = None
     Args = None # Unformatted Args!
 
-
-    def __init__(self, t, args, serialized = None):
-        if (serialized != None):
+    #TODO: add function to automatically create the right subtype message.
+    def __init__(self, t=None, args=None, serialized = None, createAsSubType = False):
+        if createAsSubType:
+            if self.Type == HandleTypes.ExceptionOccurred: 
+                self = ExceptionMessage(serialized=serialized)
+            elif self.Type == HandleTypes.RequestFileRead:
+                self = FileReadMessage(serialized=serialized)
+            elif self.Type == HandleTypes.RequestFileWrite:
+                self = FileWriteMessage(serialized=serialized)
+            elif self.Type == HandleTypes.ReleaseFileWrite:
+                self = FileReleaseMessage(serialized=serialized)
+            elif self.Type == HandleTypes.RequestFileUpdate:
+                self = FileUpdateMessage(serialized=serialized)
+            elif self.Type == HandleTypes.RequestDirectoryContents:
+                self = DirectoryMessage(serialized=serialized)
+        elif (serialized != None):
             self.Deserialize(serialized)
         else:
             self.Type = t
             self.Args = args
+
 
     def Deserialize(self, serialized):
         #TODO: This code looks evil. I don't like that. Improve this.
@@ -45,7 +59,7 @@ class ExceptionMessage(RpcMessage):
     ExceptionArgs = "" # Serialized RPC call that failed
 
 
-    def __init__(self, exceptionType, exceptionArgs, serialized = None):
+    def __init__(self, exceptionType = None, exceptionArgs = None, serialized = None):
         self.ExceptionType = exceptionType
         self.ExceptionArgs = exceptionArgs
 
@@ -71,7 +85,7 @@ class FileReadMessage(RpcMessage):
     File = ""
 
 
-    def __init__(self, file, serialized = None):
+    def __init__(self, file = None, serialized = None):
         self.File = file
 
         RpcMessage.__init__(self, 
@@ -93,7 +107,7 @@ class FileWriteMessage(RpcMessage):
     File = ""
 
 
-    def __init__(self, file, serialized = None):
+    def __init__(self, file = None, serialized = None):
         self.File = file
 
         RpcMessage.__init__(self, 
@@ -115,7 +129,7 @@ class FileReleaseMessage(RpcMessage):
     File = ""
 
 
-    def __init__(self, file, serialized = None):
+    def __init__(self, file = None, serialized = None):
         self.File = file
 
         RpcMessage.__init__(self, 
@@ -137,7 +151,7 @@ class FileUpdateMessage(RpcMessage):
     File = ""
 
 
-    def __init__(self, file, serialized = None):
+    def __init__(self, file = None, serialized = None):
         self.File = file
 
         RpcMessage.__init__(self, 
@@ -161,7 +175,7 @@ class DirectoryMessage(RpcMessage):
     Files = []
 
 
-    def __init__(self, baseDirectories, directories, files, serialized = None):
+    def __init__(self, baseDirectories = None, directories = None, files = None, serialized = None):
         self.BaseDirectory = baseDirectories
         self.Directories = directories
         self.Files = files

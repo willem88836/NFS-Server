@@ -15,24 +15,19 @@ class FileHandler:
         print("File handler initialized.")
 
 
-    def Handle(self, issuer, rpcMessage):
-        if rpcMessage.Type == HandleTypes.ExceptionOccurred:
+    def Handle(self, issuer, message):
+        if message.Type == HandleTypes.ExceptionOccurred:
             issuer.Terminate()
-        elif rpcMessage.Type == HandleTypes.RequestFileRead:
-            fileReadMessage = FileReadMessage(None).Deserialize(rpcMessage.Args)
-            self.HandleRequestFileRead(issuer, fileReadMessage)
-        elif rpcMessage.Type == HandleTypes.RequestFileWrite:
-            fileWriteMessage = FileWriteMessage(None).Deserialize(rpcMessage.Args)
-            self.HandleRequestFileWrite(issuer, fileWriteMessage)
-        elif rpcMessage.Type == HandleTypes.ReleaseFileWrite:
-            fileReleaseMessage = FileReleaseMessage(None).Deserialize(rpcMessage.Args)
-            self.HandleReleaseFileWrite(issuer, fileReleaseMessage)
-        elif rpcMessage.Type == HandleTypes.RequestFileUpdate:
-            fileUpdateMessage = FileUpdateMessage(None).Deserialize(rpcMessage.Args)
-            self.HandleFileUpdate(issuer, fileUpdateMessage)
-        elif rpcMessage.Type == HandleTypes.RequestDirectoryContents:
-            directoryMessage = DirectoryMessage(None, None, None).Deserialize(rpcMessage.Args)
-            self.HandleDirectoryContents(issuer, directoryMessage)
+        elif message.Type == HandleTypes.RequestFileRead:
+            self.HandleRequestFileRead(issuer, message)
+        elif message.Type == HandleTypes.RequestFileWrite:
+            self.HandleRequestFileWrite(issuer, message)
+        elif message.Type == HandleTypes.ReleaseFileWrite:
+            self.HandleReleaseFileWrite(issuer, message)
+        elif message.Type == HandleTypes.RequestFileUpdate:
+            self.HandleFileUpdate(issuer, message)
+        elif message.Type == HandleTypes.RequestDirectoryContents:
+            self.HandleDirectoryContents(issuer, message)
 
 
     def HandleRequestFileRead(self, issuer, message):
