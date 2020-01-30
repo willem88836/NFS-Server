@@ -1,5 +1,5 @@
 
-# from NfsClient import *
+from NfsClient import *
 from NfsServer import *
 from ClientView import *
 

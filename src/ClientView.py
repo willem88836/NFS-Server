@@ -1,4 +1,3 @@
-from HandleTypes import HandleTypes
 from NfsClient import *
 import tkinter as tk
 from tkinter import *
@@ -7,8 +6,7 @@ from tkinter import Scrollbar
 
 
 class ClientView(NfsClient):
-    # contains truple: tab, server, and current directory
-    tabs = []
+    tabs = [] # Contains ExplorerTabs
 
     def __init__(self):
         NfsClient.__init__(self)
@@ -23,23 +21,24 @@ class ClientView(NfsClient):
         selectionIndex = mouseEvent.widget.curselection()
         selection = listbox.get(selectionIndex)
         
-        truple = None
+        tab = None
         for t in self.tabs:
-            for o in t[0].winfo_children():
+            for o in t.Tab.winfo_children():
                 if o == listbox:
-                    truple = t
+                    tab = t
                     break
-            if not truple == None:
+            if not tab == None:
                 break
         
-        if not truple[2][len(truple[2])-1] == "/":
-            truple[2] += "/"
-        truple[2] += selection[6 : len(selection)]
 
-        if selection[1] == "d":
-            self.RequestFillView(truple)
-        else: 
-            print("a file is selected")
+        if (tab.IsDirectory(selection)):
+            tab.AppendDirectory(selection)
+            self.RequestFillView(tab)
+        else:
+            #TODO: add a prompt for readwrite or readonly
+            filePath =  tab.CombineDirectoryWith(selection)
+            readFileMessage = FileReadMessage(file = filePath)
+            tab.Connection.SendMessage(readFileMessage)
 
     def BuildTabs(self):
         tabControl = ttk.Notebook(self.view)
@@ -58,53 +57,87 @@ class ClientView(NfsClient):
             listbox.bind("<Double-Button-1>", self.OnDirectoryClick)
             listbox.pack(side=LEFT, fill=BOTH)
 
-            truple = [tab, connection, "/"]
-            self.tabs.append(truple)
-            self.RequestFillView(truple)
+            explorerTab = ExplorerTab(tab, connection, "/")
+            self.tabs.append(explorerTab)
+            self.RequestFillView(explorerTab)
 
-    def RequestFillView(self, truple):
-        message = RpcMessage(HandleTypes.RequestDirectoryContents, truple[2])
-        truple[1].SendMessage(message)
+    def RequestFillView(self, explorerTab):
+        message = DirectoryMessage(explorerTab.CurrentDirectory) 
+        explorerTab.Connection.SendMessage(message)
 
-    def OnDirectoryContentsReceived(self, server, args):
-        truple = None
-        for t in self.tabs:
-            if t[1].GetAddress() == server:
-                truple = t
+    def OnDirectoryContentsReceived(self, server, message):
+        explorerTab = None
+        for tab in self.tabs:
+            if tab.Connection.GetAddress() == server:
+                explorerTab = tab
 
-        if truple == None:
+        if explorerTab == None:
             print("server has no table")
-            self.SendError(server)
+            self.SendError(server) # TODO: remove this.
             return
+        
+        explorerTab.UpdateContents(
+            message.BaseDirectory,
+            message.Directories, 
+            message.Files)
+            
 
-        #TODO: Magic!
-        args = args.split("', [")[1]
-        args = args[1:len(args)-2].split("', '")
+# contains truple: tab, server, and current directory
+class ExplorerTab:
+    Tab = None
+    Connection = None
+    CurrentDirectory = None
+    
+    Directories = []
+    Files = []
+
+
+    def __init__(self, tab, connection, directory):
+        self.Tab = tab
+        self.Connection = connection
+        self.CurrentDirectory = directory
         
-        tab = truple[0]
-        
-        listbox = tab.winfo_children()
-        for o in listbox:
+    def AppendDirectory(self, path):
+        self.CurrentDirectory = self.CombineDirectoryWith(path)
+
+    def CombineDirectoryWith(self, path):
+        pseudo = self.CurrentDirectory
+        if not pseudo[len(pseudo) - 1] == "/":
+            pseudo += "/"
+        pseudo += path
+        return pseudo
+
+    def UpdateContents(self, directory, directories, files):
+        self.CurrentDirectory = directory
+        self.Files = files
+        self.Directories = directories 
+
+        # Updates the listbox contents
+        listbox = None
+        for o in self.Tab.winfo_children():
             if o.widgetName == "listbox":
                 listbox = o
-                break
         
         listbox.delete(0, END)
 
-        for i in range(len(args)):
-            current = args[i]
-            
-            if current == "":
-                continue
+        i = 0
+        for d in self.Directories:
+            listbox.insert(i, d)
+            i += 1
+        
+        for f in self.Files:
+            listbox.insert(i, f)
+            i += 1
 
-            #TODO: All this string comparison stuff sucks.. Integrate Json or something, and use more objects.
-            prefix = None
-            if current[0] == "f":
-                prefix = "(fil) "
-            elif current[0] == "d":
-                prefix = "(dir) "
-            elif current[0] == "o":
-                prefix = "(oth) "
 
-            listbox.insert(i, prefix + current[1:len(current)])
-            
+    def IsDirectory(self, name):
+        for a in self.Directories:
+            if a == name:
+                return True
+        return False
+
+    def IsFile(self, name):
+        for f in self.Files:
+            if f == name:
+                return True
+        return False

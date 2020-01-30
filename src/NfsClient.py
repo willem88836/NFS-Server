@@ -1,6 +1,5 @@
 import Configuration
 from ClientConnection import *
-from HandleTypes import HandleTypes
 from RpcMessage import *
 import socket
 from socket import *
@@ -40,34 +39,34 @@ class NfsClient:
 
 
     def SendError(self, server):
-        message =  RpcMessage(t=HandleTypes.ExceptionOccurred, args="")
+        message = ExceptionMessage(ExceptionTypes.UnspecifiedError, "")
         for c in self.connections:
             if c.GetAddress() == server:
                 c.SendMessage(message)
                 break
 
 
-    def OnMessageReceived(self, server, requestType, args):
-        if requestType == HandleTypes.ExceptionOccurred:
+    def OnMessageReceived(self, server, message):
+        if message.Type == HandleTypes.ExceptionOccurred:
             print("error")
-        elif requestType == HandleTypes.RequestFileRead:
-            self.OnFileReadGranted(server, args)
-        elif requestType == HandleTypes.RequestFileWrite:
-            self.OnFileWriteGranted(server, args)
-        elif requestType == HandleTypes.ReleaseFileWrite:
-            self.OnFileRelease(server, args)
-        elif requestType == HandleTypes.RequestFileUpdate:
-            self.OnFileUpdateGranted(server, args)
-        elif requestType == HandleTypes.RequestDirectoryContents:
-            self.OnDirectoryContentsReceived(server, args)
+        elif message.Type  == HandleTypes.RequestFileRead:
+            self.OnFileReadGranted(server, message)
+        elif message.Type  == HandleTypes.RequestFileWrite:
+            self.OnFileWriteGranted(server, message)
+        elif message.Type  == HandleTypes.ReleaseFileWrite:
+            self.OnFileRelease(server, message)
+        elif message.Type  == HandleTypes.RequestFileUpdate:
+            self.OnFileUpdateGranted(server, message)
+        elif message.Type  == HandleTypes.RequestDirectoryContents:
+            self.OnDirectoryContentsReceived(server, message)
 
-    def OnFileReadGranted(self, server, args):
+    def OnFileReadGranted(self, server, message):
         return
-    def OnFileWriteGranted(self, server, args):
+    def OnFileWriteGranted(self, server, message):
         return
-    def OnFileRelease(self, server, args):
+    def OnFileRelease(self, server, message):
         return
-    def OnFileUpdateGranted(self, server, args):
+    def OnFileUpdateGranted(self, server, message):
         return
-    def OnDirectoryContentsReceived(self, server, args):
+    def OnDirectoryContentsReceived(self, server, message):
         return

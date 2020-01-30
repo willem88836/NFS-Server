@@ -34,7 +34,7 @@ class ClientConnection (threading.Thread):
         if not self.isConnected:
             return
 
-        msg = str(message.Wrap()).encode()
+        msg = str(message.Serialize()).encode()
         print("sending message (%s) to server (%s)" % (msg, self.address))
         self.socket.send(msg)
 
@@ -45,10 +45,10 @@ class ClientConnection (threading.Thread):
         self.isRunning = True
         #TODO: This fails somehow. test this properly.
         while self.isRunning:
-            msg = self.socket.recv(Configuration.Buffer).decode()
-            print("%s received message: %s" % (self.name, str(msg)))
-            message = RpcMessage(None, None, msg)
-            self.parent.OnMessageReceived(self.address, message.Type, message.Args)
+            message = self.socket.recv(Configuration.Buffer).decode()
+            print("%s received message: %s" % (self.name, str(message)))
+            message = CreateOfSubType(message)
+            self.parent.OnMessageReceived(self.address, message)
     
     def GetRoot(self):
         return self.root

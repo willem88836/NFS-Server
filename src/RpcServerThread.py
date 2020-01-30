@@ -31,8 +31,8 @@ class RpcServerThread(threading.Thread):
                     isConnected = False
                     continue
                 
-                rpcMessage = RpcMessage(None, None, message)
-                self.RpcHandler.Handle(self, rpcMessage.Type, rpcMessage.Args)
+                rpcMessage = CreateOfSubType(message)
+                self.RpcHandler.Handle(self, rpcMessage)
         except Exception as e: 
             print("An error occured: (%s). thread %s terminated" % (format(e), self.name))
         finally:
@@ -42,7 +42,7 @@ class RpcServerThread(threading.Thread):
             self.NfsServer.CloseConnection(self)
 
     def SendMessage(self, message):
-        msg = str(message.Wrap()).encode()
+        msg = str(message.Serialize()).encode()
         self.ClientSocket.send(msg)
         print("sent message (%s) from %s" % (msg, self.name))
 
