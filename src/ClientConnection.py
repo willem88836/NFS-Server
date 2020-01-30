@@ -45,10 +45,10 @@ class ClientConnection (threading.Thread):
         self.isRunning = True
         #TODO: This fails somehow. test this properly.
         while self.isRunning:
-            msg = self.socket.recv(Configuration.Buffer).decode()
-            print("%s received message: %s" % (self.name, str(msg)))
-            message = RpcMessage(serialized = msg, createAsSubType = True)
-            self.parent.OnMessageReceived(self.address, message.Type, message.Args)
+            message = self.socket.recv(Configuration.Buffer).decode()
+            print("%s received message: %s" % (self.name, str(message)))
+            message = CreateOfSubType(message)
+            self.parent.OnMessageReceived(self.address, message)
     
     def GetRoot(self):
         return self.root

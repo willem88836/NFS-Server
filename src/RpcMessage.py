@@ -16,36 +16,40 @@ class ExceptionTypes:
     UnspecifiedError = 3
 
 
+def CreateOfSubType(serialized):
+    subMessage = RpcMessage(serialized = serialized)
+
+    if subMessage.Type == HandleTypes.ExceptionOccurred: 
+        return ExceptionMessage(serialized=serialized)
+    elif subMessage.Type == HandleTypes.RequestFileRead:
+        return FileReadMessage(serialized=serialized)
+    elif subMessage.Type == HandleTypes.RequestFileWrite:
+        return FileWriteMessage(serialized=serialized)
+    elif subMessage.Type == HandleTypes.ReleaseFileWrite:
+        return FileReleaseMessage(serialized=serialized)
+    elif subMessage.Type == HandleTypes.RequestFileUpdate:
+        return FileUpdateMessage(serialized=serialized)
+    elif subMessage.Type == HandleTypes.RequestDirectoryContents:
+        return DirectoryMessage(serialized=serialized)
+
+
 # Base Class for all RpcMessages.
 class RpcMessage: 
     Type = None
     Args = None # Unformatted Args!
 
     #TODO: add function to automatically create the right subtype message.
-    def __init__(self, t=None, args=None, serialized = None, createAsSubType = False):
-        if createAsSubType:
-            if self.Type == HandleTypes.ExceptionOccurred: 
-                self = ExceptionMessage(serialized=serialized)
-            elif self.Type == HandleTypes.RequestFileRead:
-                self = FileReadMessage(serialized=serialized)
-            elif self.Type == HandleTypes.RequestFileWrite:
-                self = FileWriteMessage(serialized=serialized)
-            elif self.Type == HandleTypes.ReleaseFileWrite:
-                self = FileReleaseMessage(serialized=serialized)
-            elif self.Type == HandleTypes.RequestFileUpdate:
-                self = FileUpdateMessage(serialized=serialized)
-            elif self.Type == HandleTypes.RequestDirectoryContents:
-                self = DirectoryMessage(serialized=serialized)
-        elif (serialized != None):
+    def __init__(self, t=None, args=None, serialized = None):
+        if (serialized != None):
             self.Deserialize(serialized)
         else:
             self.Type = t
             self.Args = args
-
-
+    
+    
     def Deserialize(self, serialized):
         #TODO: This code looks evil. I don't like that. Improve this.
-        msg = str(serialized[1:len(serialized)-1])
+        msg = str(serialized[1:len(serialized) - 1])
         self.Type = int(msg[0])
         self.Args = msg[3 : len(msg)]
         
@@ -180,10 +184,10 @@ class DirectoryMessage(RpcMessage):
         self.Directories = directories
         self.Files = files
         
-        RpcMessage.__init__(self, 
-            HandleTypes.RequestDirectoryContents, 
-            [baseDirectories, directories, files], 
-            serialized)
+        RpcMessage.__init__(
+            self, 
+            t = HandleTypes.RequestDirectoryContents, 
+            serialized = serialized)
 
     def Serialize(self):
         return str([self.Type, self.BaseDirectory, self.Directories, self.Files])
@@ -192,7 +196,7 @@ class DirectoryMessage(RpcMessage):
         RpcMessage.Deserialize(self, serialized)
         serialized = self.Args
 
-        args = serialized.split(", ['")
+        args = serialized.split(", [")
         
         #grabs the root dir. 
         baseDir = args[0][1 : len(args[0]) - 1]
@@ -200,23 +204,35 @@ class DirectoryMessage(RpcMessage):
         fileEntries = []
         
         # grabs the listed directories. 
-        dirs = args[1].split("', '")
+        dirs = args[1].replace(", ", "'").split("'")
         dirCount = len(dirs)
         for i in range(dirCount): 
+            if dirs[i] == "":
+                continue
+
             d = None
             if i == dirCount - 1: 
+                break
                 d = dirs[i][0 : len(dirs[i]) - 2]
+            elif i == 0:
+                d = dirs[i][1 : len(dirs[i])]
             else: 
                 d = dirs[i]
             dirEntries.append(d)
 
         # grabs the listed files. 
-        files = args[2].split("', '")
+        files = args[2].replace(", ", "'").split("'")
         fileCount = len(files)
         for i in range(fileCount):
+            if files[i] == "":
+                continue
+
             f = None
-            if i == dirCount - 1: 
+            if i == fileCount - 1: 
+                break
                 f = files[i][0 : len(files[i]) - 2]
+            elif i == 0:
+                f = files[i][1 : len(files[i])]
             else: 
                 f = files[i]
             fileEntries.append(f)

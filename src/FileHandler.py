@@ -104,13 +104,13 @@ class FileHandler:
             directories = []
 
             for e in dirEntries:
-                p = self.root + '/' + e
-                if os.path.isdir(p):
+                cp = self.root + message.BaseDirectory + '/' + e
+                if os.path.isdir(cp):
                     directories.append(e)
-                elif os.path.isfile(p):
+                elif os.path.isfile(cp):
                     files.append(e)
                 else:
-                    print("found object that is not supported: %s" % p)
+                    print("found object that is not supported: %s" % cp)
             
             msg = DirectoryMessage(message.BaseDirectory, directories, files)
         
