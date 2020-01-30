@@ -102,7 +102,7 @@ class FileReadMessage(RpcMessage):
 
     def Deserialize(self, serialized):
         RpcMessage.Deserialize(self, serialized)
-        self.File = self.Args
+        self.File = self.Args[1 : len(self.Args) - 1]
 
         return self
 
@@ -124,7 +124,7 @@ class FileWriteMessage(RpcMessage):
 
     def Deserialize(self, serialized):
         RpcMessage.Deserialize(self, serialized)
-        self.File = self.Args
+        self.File = self.Args[1 : len(self.Args) - 1]
 
         return self
 
@@ -146,7 +146,7 @@ class FileReleaseMessage(RpcMessage):
 
     def Deserialize(self, serialized):
         RpcMessage.Deserialize(self, serialized)
-        self.File = self.Args
+        self.File = self.Args[1 : len(self.Args) - 1]
 
         return self
 
@@ -168,7 +168,7 @@ class FileUpdateMessage(RpcMessage):
 
     def Deserialize(self, serialized):
         RpcMessage.Deserialize(self, serialized)
-        self.File = self.Args
+        self.File = self.Args[1 : len(self.Args) - 1]
 
         return self
 
@@ -213,7 +213,6 @@ class DirectoryMessage(RpcMessage):
             d = None
             if i == dirCount - 1: 
                 break
-                d = dirs[i][0 : len(dirs[i]) - 2]
             elif i == 0:
                 d = dirs[i][1 : len(dirs[i])]
             else: 
@@ -230,7 +229,6 @@ class DirectoryMessage(RpcMessage):
             f = None
             if i == fileCount - 1: 
                 break
-                f = files[i][0 : len(files[i]) - 2]
             elif i == 0:
                 f = files[i][1 : len(files[i])]
             else: 

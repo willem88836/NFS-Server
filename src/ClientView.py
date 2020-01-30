@@ -35,8 +35,10 @@ class ClientView(NfsClient):
             tab.AppendDirectory(selection)
             self.RequestFillView(tab)
         else:
-            print("A file is selected")
             #TODO: add a prompt for readwrite or readonly
+            filePath =  tab.CombineDirectoryWith(selection)
+            readFileMessage = FileReadMessage(file = filePath)
+            tab.Connection.SendMessage(readFileMessage)
 
     def BuildTabs(self):
         tabControl = ttk.Notebook(self.view)
@@ -96,11 +98,14 @@ class ExplorerTab:
         self.CurrentDirectory = directory
         
     def AppendDirectory(self, path):
-        #TODO: Check if this test is necessary. The default directory is "/"
-        if not self.CurrentDirectory[len(self.CurrentDirectory) - 1] == "/":
-            self.CurrentDirectory += "/"
-        self.CurrentDirectory += path
+        self.CurrentDirectory = self.CombineDirectoryWith(path)
 
+    def CombineDirectoryWith(self, path):
+        pseudo = self.CurrentDirectory
+        if not pseudo[len(pseudo) - 1] == "/":
+            pseudo += "/"
+        pseudo += path
+        return pseudo
 
     def UpdateContents(self, directory, directories, files):
         self.CurrentDirectory = directory
