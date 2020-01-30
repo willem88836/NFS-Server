@@ -30,9 +30,9 @@ class ClientView(NfsClient):
             if not tab == None:
                 break
         
-        tab.AppendDirectory(selection)
 
         if (tab.IsDirectory(selection)):
+            tab.AppendDirectory(selection)
             self.RequestFillView(tab)
         else:
             print("A file is selected")
