@@ -60,8 +60,7 @@ class ClientView(NfsClient):
             self.RequestFillView(explorerTab)
 
     def RequestFillView(self, explorerTab):
-        #TODO: Make the dirs and files optional?
-        message = DirectoryMessage(explorerTab.CurrentDirectory, [], []) 
+        message = DirectoryMessage(explorerTab.CurrentDirectory) 
         explorerTab.Connection.SendMessage(message)
 
     def OnDirectoryContentsReceived(self, server, message):

@@ -179,8 +179,8 @@ class DirectoryMessage(RpcMessage):
     Files = []
 
 
-    def __init__(self, baseDirectories = None, directories = None, files = None, serialized = None):
-        self.BaseDirectory = baseDirectories
+    def __init__(self, baseDirectory = None, directories = [], files = [], serialized = None):
+        self.BaseDirectory = baseDirectory
         self.Directories = directories
         self.Files = files
         
