@@ -1,8 +1,5 @@
-from NfsClient import *
-import tkinter as tk
-from tkinter import *
-from tkinter import ttk
-from tkinter import Scrollbar
+from NfsClient import NfsClient, FileReadMessage, DirectoryMessage
+from tkinter import Tk, RIGHT, Y, Listbox, ttk, Scrollbar, SINGLE, LEFT, BOTH, END
 
 
 class ClientView(NfsClient):
@@ -10,7 +7,7 @@ class ClientView(NfsClient):
 
     def __init__(self):
         NfsClient.__init__(self)
-        self.view = tk.Tk()
+        self.view = Tk()
         self.view.title = "NFS Client View"
         self.BuildTabs()
         print("Client View Initialized")

@@ -1,8 +1,6 @@
 import Configuration
-from ClientConnection import *
-from RpcMessage import *
-import socket
-from socket import *
+from ClientConnection import ClientConnection
+from RpcMessage import ExceptionMessage, ExceptionTypes, HandleTypes
 import threading
 
 class NfsClient:

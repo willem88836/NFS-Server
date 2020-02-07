@@ -1,8 +1,8 @@
 import threading
 import socket
 import Configuration 
-from socket import *
-from RpcMessage import *
+from socket import socket, AF_INET, SOCK_STREAM
+from RpcMessage import CreateOfSubType
 
 
 class ClientConnection (threading.Thread):
@@ -42,7 +42,7 @@ class ClientConnection (threading.Thread):
 
     def run(self):
         if not self.isConnected:
-            return; 
+            return
 
         self.isRunning = True
         #TODO: This fails somehow. test this properly.

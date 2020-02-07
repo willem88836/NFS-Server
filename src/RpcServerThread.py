@@ -1,8 +1,7 @@
-import socket
-from socket import *
+from socket import os
 import threading
 import Configuration
-from RpcMessage import *
+from RpcMessage import CreateOfSubType
 
 
 class RpcServerThread(threading.Thread): 

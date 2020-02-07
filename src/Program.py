@@ -1,7 +1,6 @@
 
-from NfsClient import *
-from NfsServer import *
-from ClientView import *
+from NfsServer import NfsServer
+from ClientView import ClientView
 import time
 
 localServer = NfsServer()
