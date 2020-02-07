@@ -6,6 +6,7 @@ Port = 12004
 
 ConfigPath = "~"
 RootLocation = ConfigPath + "/rootPath"
+ServerLocation = ConfigPath + "/serverList"
 
 
 # Returns the root directory of the NFS system.
@@ -37,3 +38,22 @@ def GetRootDirectory():
         f.close()
     
     return r
+
+
+def GetServerList():
+    if not os.path.isfile(ServerLocation):
+        print("server path not set")
+        f = open(ServerLocation, "x")
+        f.write("")
+        f.close()
+        return [""]
+    else:
+        f = open(ServerLocation, "r")
+        l = f.readlines()
+        f.close()
+        return l
+
+def AppendServerList(server):
+    f = open(ServerLocation, "w+")
+    f.write(str(server))
+    f.close()
