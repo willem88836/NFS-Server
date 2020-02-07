@@ -9,19 +9,20 @@ localServer.name = "ServerThread"
 localServer.start()
 
 MAX_FAILS = 3
+SLEEP_DURATION = 5
 failCount = 0
 
+serverFailed = False
 
-# Unsafe. Add Timeout..
 while not localServer.IsActive():
     print("server is not ready yet, delaying client..")
-    time.sleep(5)
+    time.sleep(SLEEP_DURATION)
     failCount += 1
     if failCount >= MAX_FAILS:
+        serverFailed = True
         break
 
-## double check..    
-if (failCount >= MAX_FAILS):
+if (serverFailed):
     print("Initializing Server failed, terminating program")
     localServer.Terminate()
 else:
