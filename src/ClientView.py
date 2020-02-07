@@ -18,8 +18,11 @@ class ClientView(NfsClient):
 
     def OnDirectoryClick(self, mouseEvent):
         listbox = mouseEvent.widget
-        selectionIndex = mouseEvent.widget.curselection()
-        selection = listbox.get(selectionIndex)
+        try:
+            selectionIndex = int(mouseEvent.widget.curselection()[0])
+        except:
+            print("Couldn't fetch selection")
+            return
 
         tab = None
         for t in self.tabs:
@@ -31,11 +34,14 @@ class ClientView(NfsClient):
                 break
         
         #selection is the first, thus move up.
-        if selectionIndex[0] == 0:
-            print("Move UP Button")
+        if selectionIndex == 0:
             tab.MoveUp()
             self.RequestFillView(tab)
-        elif (tab.IsDirectory(selection)):
+            return 
+
+        selection = listbox.get(selectionIndex)
+
+        if (tab.IsDirectory(selection)):
             tab.AppendDirectory(selection)
             self.RequestFillView(tab)
         else:
@@ -86,7 +92,6 @@ class ClientView(NfsClient):
             message.Files)
 
             
-
 # contains truple: tab, server, and current directory
 class ExplorerTab:
     Tab = None
@@ -121,8 +126,6 @@ class ExplorerTab:
         self.CurrentDirectory = self.CurrentDirectory[0 : i]
         if len(self.CurrentDirectory) == 0:
             self.CurrentDirectory += "/"
-
-        print(self.CurrentDirectory)
 
     def UpdateContents(self, directory, directories, files):
         self.CurrentDirectory = directory
