@@ -20,7 +20,7 @@ class ClientView(NfsClient):
         listbox = mouseEvent.widget
         selectionIndex = mouseEvent.widget.curselection()
         selection = listbox.get(selectionIndex)
-        
+
         tab = None
         for t in self.tabs:
             for o in t.Tab.winfo_children():
@@ -30,8 +30,12 @@ class ClientView(NfsClient):
             if not tab == None:
                 break
         
-
-        if (tab.IsDirectory(selection)):
+        #selection is the first, thus move up.
+        if selectionIndex[0] == 0:
+            print("Move UP Button")
+            tab.MoveUp()
+            self.RequestFillView(tab)
+        elif (tab.IsDirectory(selection)):
             tab.AppendDirectory(selection)
             self.RequestFillView(tab)
         else:
@@ -80,6 +84,7 @@ class ClientView(NfsClient):
             message.BaseDirectory,
             message.Directories, 
             message.Files)
+
             
 
 # contains truple: tab, server, and current directory
@@ -107,6 +112,18 @@ class ExplorerTab:
         pseudo += path
         return pseudo
 
+    def MoveUp(self):
+        i = 0
+        for j in range(len(self.CurrentDirectory)):
+            c = self.CurrentDirectory[j]
+            if c == "/": 
+                i = j
+        self.CurrentDirectory = self.CurrentDirectory[0 : i]
+        if len(self.CurrentDirectory) == 0:
+            self.CurrentDirectory += "/"
+
+        print(self.CurrentDirectory)
+
     def UpdateContents(self, directory, directories, files):
         self.CurrentDirectory = directory
         self.Files = files
@@ -120,7 +137,10 @@ class ExplorerTab:
         
         listbox.delete(0, END)
 
-        i = 0
+        # The move-up button.
+        listbox.insert(0, "[...]")
+
+        i = 1
         for d in self.Directories:
             listbox.insert(i, d)
             i += 1
