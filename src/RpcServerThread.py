@@ -9,7 +9,7 @@ class RpcServerThread(threading.Thread):
 
     def __init__(self, clientSocket, clientAddress, nfsServer, rpcHandler):
         threading.Thread.__init__(self)
-        self.name = "RpcThread%s" % str(clientAddress)
+        self.name = "ServerRpcThread%s" % str(clientAddress)
         self.ClientSocket = clientSocket
         self.ClientAddress = clientAddress
         self.NfsServer = nfsServer

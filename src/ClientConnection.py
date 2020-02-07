@@ -16,6 +16,8 @@ class ClientConnection (threading.Thread):
         self.address = address
         self.root = root
         self.socket = socket(AF_INET, SOCK_STREAM)
+
+        self.name = "ClientRpcThread(%s, %s)" % (address, root)
         
         try:
             self.socket.connect((address, Configuration.Port))

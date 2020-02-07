@@ -25,7 +25,6 @@ class NfsClient:
             address = str(entry[0][2:len(entry[0]) - 1])
             root = str(entry[1][1:len(entry[1]) - 3])
             connection = ClientConnection(self, address, root)
-            connection.name = "ClientConnection%s" % entry
             connection.start()
             self.connections.append(connection)
     
