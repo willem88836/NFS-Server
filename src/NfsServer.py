@@ -9,9 +9,9 @@ from tkinter.filedialog import askdirectory
 #TODO: Create Server View
 class NfsServer (threading.Thread): 
     connectionSemaphore = threading.BoundedSemaphore(value=1)
-    currentConnections = 0
     maximumConnections = 5
-    isActive = True
+    activeConnections = []
+    isActive = False
     
     def __init__(self):
         threading.Thread.__init__(self)
@@ -26,9 +26,10 @@ class NfsServer (threading.Thread):
         rpcSocket = socket(AF_INET, SOCK_STREAM)
         rpcSocket.bind(('', self.connectionPort))
         rpcSocket.listen(1)
+        self.isActive = True
 
         while self.isActive: 
-            while self.currentConnections >= self.maximumConnections:
+            while len(self.activeConnections) >= self.maximumConnections:
                 continue
 
             print("Awaiting Connection...")
@@ -36,7 +37,7 @@ class NfsServer (threading.Thread):
             
             rpcThread = RpcServerThread(clientSocket, clientIP, self, self.fileHandler)
             self.connectionSemaphore.acquire(self)
-            self.currentConnections += 1
+            self.activeConnections.append(rpcThread)
             self.connectionSemaphore.release()
             rpcThread.start()
 
@@ -44,6 +45,16 @@ class NfsServer (threading.Thread):
 
     def CloseConnection(self, rpcThread):
         self.connectionSemaphore.acquire(rpcThread)
-        self.currentConnections -= 1
+        self.activeConnections.remove(rpcThread)
         self.connectionSemaphore.release()
     
+    def IsActive(self):
+        return self.isActive
+
+    def Terminate(self):
+        self.connectionSemaphore.acquire(self)
+        for c in self.activeConnections:
+            c.Terminate()
+        self.activeConnections.clear()
+        self.connectionSemaphore.release()
+        
