@@ -53,9 +53,9 @@ class ClientView(NfsClient):
             scrollbar = ttk.Scrollbar(tab)
             scrollbar.pack(side=RIGHT, fill=Y)
 
-            listbox = Listbox(tab, yscrollcommand=scrollbar.set, selectmode=SINGLE)
+            listbox = Listbox(tab, yscrollcommand=scrollbar.set, selectmode=SINGLE, width=150, height=20)
             listbox.bind("<Double-Button-1>", self.OnDirectoryClick)
-            listbox.pack(side=LEFT, fill=BOTH)
+            listbox.pack(side=LEFT, fill=BOTH, padx=15, pady=15)
 
             explorerTab = ExplorerTab(tab, connection, "/")
             self.tabs.append(explorerTab)

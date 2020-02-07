@@ -8,8 +8,8 @@ localServer = NfsServer()
 localServer.name = "ServerThread"
 localServer.start()
 
-MAX_FAILS = 3
-SLEEP_DURATION = 5
+MAX_FAILS = 6
+SLEEP_DURATION = 1
 failCount = 0
 
 serverFailed = False
